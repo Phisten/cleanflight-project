@@ -26,6 +26,8 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT 17
 
+#define EXTI_CALLBACK_HANDLER_COUNT 1 // MPU data ready, no MAG
+
 #define USE_MPU_DATA_READY_SIGNAL
 #define ENSURE_MPU_DATA_READY_IS_LOW
 
@@ -86,27 +88,22 @@
 #define USE_ADC
 #define BOARD_HAS_VOLTAGE_DIVIDER
 
+
 #define ADC_INSTANCE                ADC2
 #define ADC_DMA_CHANNEL             DMA2_Channel1
 #define ADC_AHB_PERIPHERAL          RCC_AHBPeriph_DMA2
 
-#define ADC0_GPIO                   GPIOA
-#define ADC0_GPIO_PIN               GPIO_Pin_4
-#define ADC0_CHANNEL                ADC_Channel_1
+#define VBAT_ADC_GPIO               GPIOA
+#define VBAT_ADC_GPIO_PIN           GPIO_Pin_4
+#define VBAT_ADC_CHANNEL            ADC_Channel_1
 
-#define ADC1_GPIO                   GPIOA
-#define ADC1_GPIO_PIN               GPIO_Pin_5
-#define ADC1_CHANNEL                ADC_Channel_2
+#define CURRENT_METER_ADC_GPIO      GPIOA
+#define CURRENT_METER_ADC_GPIO_PIN  GPIO_Pin_5
+#define CURRENT_METER_ADC_CHANNEL   ADC_Channel_2
 
-#define ADC2_GPIO                   GPIOB
-#define ADC2_GPIO_PIN               GPIO_Pin_2
-#define ADC2_CHANNEL                ADC_Channel_12
-
-#define ADC_CHANNEL_COUNT 3
-
-#define ADC_BATTERY     ADC_CHANNEL0
-#define ADC_CURRENT     ADC_CHANNEL1
-#define ADC_RSSI        ADC_CHANNEL2
+#define RSSI_ADC_GPIO               GPIOB
+#define RSSI_ADC_GPIO_PIN           GPIO_Pin_2
+#define RSSI_ADC_CHANNEL            ADC_Channel_12
 
 #define BLACKBOX
 #define GPS
@@ -115,7 +112,6 @@
 #define USE_SERVOS
 #define TELEMETRY
 #define USE_CLI
-#define USE_EXTI
 
 #define SPEKTRUM_BIND
 // USART3,
@@ -123,9 +119,3 @@
 #define BIND_PIN   Pin_11
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
-
-// IO - stm32f303cc in 48pin package ?
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC (BIT(13)|BIT(14)|BIT(15))
-#define TARGET_IO_PORTF (BIT(0)|BIT(1))

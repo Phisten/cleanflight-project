@@ -91,33 +91,22 @@
 
 #define USE_ADC
 
-#define ADC_INSTANCE                ADC1
-#define ADC_ABP2_PERIPHERAL         RCC_APB2Periph_ADC1
-#define ADC_AHB_PERIPHERAL          RCC_AHBPeriph_DMA1
-#define ADC_DMA_CHANNEL             DMA1_Channel1
+#define CURRENT_METER_ADC_GPIO      GPIOB
+#define CURRENT_METER_ADC_GPIO_PIN  GPIO_Pin_1
+#define CURRENT_METER_ADC_CHANNEL   ADC_Channel_9
 
-#define ADC0_GPIO                   GPIOB
-#define ADC0_GPIO_PIN               GPIO_Pin_1
-#define ADC0_CHANNEL                ADC_Channel_9
+#define VBAT_ADC_GPIO               GPIOA
+#define VBAT_ADC_GPIO_PIN           GPIO_Pin_0
+#define VBAT_ADC_CHANNEL            ADC_Channel_0
 
-#define ADC1_GPIO                   GPIOA
-#define ADC1_GPIO_PIN               GPIO_Pin_0
-#define ADC1_CHANNEL                ADC_Channel_0
-
-#define ADC2_GPIO                   GPIOB
-#define ADC2_GPIO_PIN               GPIO_Pin_0
-#define ADC2_CHANNEL                ADC_Channel_8
-
-#define ADC_CHANNEL_COUNT 3
-
-#define ADC_CURRENT     ADC_CHANNEL0
-#define ADC_BATTERY     ADC_CHANNEL1
-#define ADC_RSSI        ADC_CHANNEL2
+#define RSSI_ADC_GPIO               GPIOB
+#define RSSI_ADC_GPIO_PIN           GPIO_Pin_0
+#define RSSI_ADC_CHANNEL            ADC_Channel_8
 
 #define LED_STRIP
 #define LED_STRIP_TIMER TIM3
 #define WS2811_DMA_TC_FLAG           DMA1_FLAG_TC6
-#define WS2811_DMA_HANDLER_IDENTIFER DMA1Channel6Descriptor
+#define WS2811_DMA_HANDLER_IDENTIFER DMA1_CH6_HANDLER
 
 #define SPEKTRUM_BIND
 // UART3, PB11 (Flexport)
@@ -131,8 +120,9 @@
 #define SONAR_TRIGGER_GPIO          GPIOB
 #define SONAR_ECHO_PIN              Pin_0   // (PB0) - only 3.3v ( add a 1K Ohms resistor )
 #define SONAR_ECHO_GPIO             GPIOB
-#define SONAR_TRIGGER_IO            PB5
-#define SONAR_ECHO_IO               PB1
+#define SONAR_EXTI_LINE             EXTI_Line0
+#define SONAR_EXTI_PIN_SOURCE       GPIO_PinSource0
+#define SONAR_EXTI_IRQN             EXTI0_IRQn
 
 #define GPS
 #define BLACKBOX
@@ -142,12 +132,7 @@
 #define SERIAL_RX
 #define USE_SERVOS
 #define USE_CLI
-#define USE_EXTI
 #define TARGET_MOTOR_COUNT 6
 
 
 
-// IO - from schematics
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC (BIT(14))

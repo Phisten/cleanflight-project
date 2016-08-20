@@ -46,6 +46,8 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT 11
 
+#define EXTI_CALLBACK_HANDLER_COUNT 1 // MPU data ready
+
 //#define DEBUG_MPU_DATA_READY_INTERRUPT
 #define USE_MPU_DATA_READY_SIGNAL
 
@@ -144,14 +146,11 @@
 #define ADC_DMA_CHANNEL      DMA2_Channel1
 #define ADC_AHB_PERIPHERAL   RCC_AHBPeriph_DMA2
 
+//#define BOARD_HAS_VOLTAGE_DIVIDER
 
-#define ADC0_GPIO                   GPIOA
-#define ADC0_GPIO_PIN               GPIO_Pin_4
-#define ADC0_CHANNEL                ADC_Channel_1
-
-#define ADC_CHANNEL_COUNT 1
-
-#define ADC_BATTERY     ADC_CHANNEL0
+#define VBAT_ADC_GPIO        GPIOA
+#define VBAT_ADC_GPIO_PIN    GPIO_Pin_4
+#define VBAT_ADC_CHANNEL     ADC_Channel_1
 
 #define DEFAULT_RX_FEATURE FEATURE_RX_SERIAL
 #define DEFAULT FEATURES FEATURE_MOTOR_STOP
@@ -163,7 +162,6 @@
 //#define DISPLAY
 #define USE_SERVOS
 #define USE_CLI
-#define USE_EXTI
 
 #define SPEKTRUM_BIND
 // UART2, PA3
@@ -178,9 +176,3 @@
 #define BINDPLUG_PORT  GPIOB
 #define BINDPLUG_PIN   Pin_12
 
-// IO - assuming 303 in 64pin package, TODO
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC 0xffff
-#define TARGET_IO_PORTD (BIT(2))
-#define TARGET_IO_PORTF (BIT(0)|BIT(1)|BIT(4))

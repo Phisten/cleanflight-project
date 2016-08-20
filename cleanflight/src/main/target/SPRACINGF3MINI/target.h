@@ -33,6 +33,8 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT 12 // 8 Outputs; PPM; LED Strip; 2 additional PWM pins also on UART3 RX/TX pins.
 
+#define EXTI15_10_CALLBACK_HANDLER_COUNT 2 // MPU_INT, SDCardDetect
+
 #define USE_MPU_DATA_READY_SIGNAL
 #define ENSURE_MPU_DATA_READY_IS_LOW
 
@@ -69,9 +71,9 @@
 #define SONAR_TRIGGER_GPIO          GPIOB
 #define SONAR_ECHO_PIN              Pin_1   // RC_CH8 (PB1) - only 3.3v ( add a 1K Ohms resistor )
 #define SONAR_ECHO_GPIO             GPIOB
-#define SONAR_TRIGGER_IO            PB0
-#define SONAR_ECHO_IO               PB1
-
+#define SONAR_EXTI_LINE             EXTI_Line1
+#define SONAR_EXTI_PIN_SOURCE       EXTI_PinSource1
+#define SONAR_EXTI_IRQN             EXTI1_IRQn
 
 #define USB_IO
 #define USB_CABLE_DETECTION
@@ -139,9 +141,12 @@
 #define SDCARD_DETECT_INVERTED
 
 #define SDCARD_DETECT_PIN                   GPIO_Pin_14
+#define SDCARD_DETECT_EXTI_LINE             EXTI_Line14
+#define SDCARD_DETECT_EXTI_PIN_SOURCE       EXTI_PinSource14
 #define SDCARD_DETECT_GPIO_PORT             GPIOC
 #define SDCARD_DETECT_GPIO_CLK              RCC_AHBPeriph_GPIOC
-#define SDCARD_DETECT_IO                    PC14
+#define SDCARD_DETECT_EXTI_PORT_SOURCE      EXTI_PortSourceGPIOC
+#define SDCARD_DETECT_EXTI_IRQn             EXTI15_10_IRQn
 
 #define SDCARD_SPI_INSTANCE                 SPI2
 #define SDCARD_SPI_CS_GPIO                  SPI2_GPIO
@@ -162,27 +167,22 @@
 #define USE_ADC
 #define BOARD_HAS_VOLTAGE_DIVIDER
 
+
 #define ADC_INSTANCE                ADC2
 #define ADC_DMA_CHANNEL             DMA2_Channel1
 #define ADC_AHB_PERIPHERAL          RCC_AHBPeriph_DMA2
 
-#define ADC0_GPIO                   GPIOA
-#define ADC0_GPIO_PIN               GPIO_Pin_4
-#define ADC0_CHANNEL                ADC_Channel_1
+#define VBAT_ADC_GPIO               GPIOA
+#define VBAT_ADC_GPIO_PIN           GPIO_Pin_4
+#define VBAT_ADC_CHANNEL            ADC_Channel_1
 
-#define ADC1_GPIO                   GPIOA
-#define ADC1_GPIO_PIN               GPIO_Pin_5
-#define ADC1_CHANNEL                ADC_Channel_2
+#define CURRENT_METER_ADC_GPIO      GPIOA
+#define CURRENT_METER_ADC_GPIO_PIN  GPIO_Pin_5
+#define CURRENT_METER_ADC_CHANNEL   ADC_Channel_2
 
-#define ADC2_GPIO                   GPIOB
-#define ADC2_GPIO_PIN               GPIO_Pin_2
-#define ADC2_CHANNEL                ADC_Channel_12
-
-#define ADC_CHANNEL_COUNT 3
-
-#define ADC_BATTERY     ADC_CHANNEL0
-#define ADC_CURRENT     ADC_CHANNEL1
-#define ADC_RSSI        ADC_CHANNEL2
+#define RSSI_ADC_GPIO               GPIOB
+#define RSSI_ADC_GPIO_PIN           GPIO_Pin_2
+#define RSSI_ADC_CHANNEL            ADC_Channel_12
 
 #define LED_STRIP
 #define LED_STRIP_TIMER TIM1
@@ -197,7 +197,7 @@
 #define WS2811_DMA_CHANNEL              DMA1_Channel2
 #define WS2811_IRQ                      DMA1_Channel2_IRQn
 #define WS2811_DMA_TC_FLAG              DMA1_FLAG_TC2
-#define WS2811_DMA_HANDLER_IDENTIFER    DMA1Channel2Descriptor
+#define WS2811_DMA_HANDLER_IDENTIFER    DMA1_CH2_HANDLER
 
 #define TRANSPONDER
 #define TRANSPONDER_GPIO                     GPIOA
@@ -210,7 +210,7 @@
 #define TRANSPONDER_DMA_CHANNEL              DMA1_Channel2
 #define TRANSPONDER_IRQ                      DMA1_Channel2_IRQn
 #define TRANSPONDER_DMA_TC_FLAG              DMA1_FLAG_TC2
-#define TRANSPONDER_DMA_HANDLER_IDENTIFER    DMA1Channel2Descriptor
+#define TRANSPONDER_DMA_HANDLER_IDENTIFER    DMA1_CH2_HANDLER
 
 #define REDUCE_TRANSPONDER_CURRENT_DRAW_WHEN_USB_CABLE_PRESENT
 
@@ -225,7 +225,6 @@
 #define DISPLAY
 #define USE_SERVOS
 #define USE_CLI
-#define USE_EXTI
 
 #define BUTTONS
 #define BUTTON_A_PORT  GPIOB
@@ -243,9 +242,3 @@
 #define BINDPLUG_PIN   BUTTON_B_PIN
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
-
-// IO - stm32f303cc in 48pin package
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC (BIT(13)|BIT(14)|BIT(15))
-#define TARGET_IO_PORTF (BIT(0)|BIT(1))

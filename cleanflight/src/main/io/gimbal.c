@@ -19,13 +19,14 @@
 #include <stdint.h>
 
 #include <platform.h>
-#include "build/build_config.h"
+#include "build_config.h"
 
-#include "build/debug.h"
+#include "debug.h"
 
 #include "config/parameter_group.h"
 #include "config/parameter_group_ids.h"
-#include "config/profile.h"
+
+#include "config/config.h"
 
 #include "io/gimbal.h"
 

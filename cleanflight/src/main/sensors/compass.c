@@ -20,13 +20,12 @@
 
 #include <platform.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include "common/axis.h"
 
 #include "config/parameter_group.h"
 #include "config/parameter_group_ids.h"
-#include "config/profile.h"
 
 #include "drivers/sensor.h"
 #include "drivers/compass.h"
@@ -35,9 +34,8 @@
 #include "drivers/light_led.h"
 
 #include "sensors/boardalignment.h"
-
-#include "fc/runtime_config.h"
-#include "fc/config.h"
+#include "config/runtime_config.h"
+#include "config/config.h"
 
 #include "sensors/sensors.h"
 #include "sensors/compass.h"

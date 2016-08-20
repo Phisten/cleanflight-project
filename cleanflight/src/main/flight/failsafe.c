@@ -21,13 +21,11 @@
 
 #include <platform.h>
 
-#include "build/debug.h"
+#include "debug.h"
 
 #include "common/axis.h"
 
 #include "config/parameter_group.h"
-#include "config/parameter_group_ids.h"
-#include "config/config_reset.h"
 
 #include "drivers/system.h"
 
@@ -35,10 +33,12 @@
 
 #include "io/beeper.h"
 #include "io/motor_and_servo.h"
+#include "io/rc_controls.h"
 
-#include "fc/rc_controls.h"
-#include "fc/runtime_config.h"
-#include "fc/config.h"
+#include "config/parameter_group_ids.h"
+#include "config/runtime_config.h"
+#include "config/config.h"
+#include "config/config_reset.h"
 
 #include "flight/failsafe.h"
 

@@ -24,9 +24,10 @@
 #include <ctype.h>
 
 #include <platform.h>
-#include "build/version.h"
+#include "scheduler.h"
+#include "version.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include "common/utils.h"
 #include "common/axis.h"
@@ -52,16 +53,11 @@
 
 #include "drivers/buf_writer.h"
 
-#include "fc/rc_controls.h"
-#include "fc/rate_profile.h"
-#include "fc/rc_adjustments.h"
-#include "fc/fc_serial.h"
-#include "fc/fc_tasks.h"
-
-#include "scheduler/scheduler.h"
-
 #include "io/gps.h"
 #include "io/gimbal.h"
+#include "io/rc_controls.h"
+#include "io/rate_profile.h"
+#include "io/rc_adjustments.h"
 #include "io/serial.h"
 #include "io/ledstrip.h"
 #include "io/flashfs.h"
@@ -94,8 +90,8 @@
 #include "telemetry/frsky.h"
 #include "telemetry/hott.h"
 
-#include "fc/runtime_config.h"
-#include "fc/config.h"
+#include "config/runtime_config.h"
+#include "config/config.h"
 #include "config/config_system.h"
 #include "config/feature.h"
 #include "config/profile.h"
@@ -397,10 +393,6 @@ static const char * const lookupTableGyroLpf[] = {
     "10HZ"
 };
 
-static const char * const lookupTablePidDeltaMethod[] = {
-    "MEASUREMENT", "ERROR"
-};
-
 typedef struct lookupTableEntry_s {
     const char * const *values;
     const uint8_t valueCount;
@@ -423,7 +415,6 @@ typedef enum {
     TABLE_SERIAL_RX,
     TABLE_GYRO_FILTER,
     TABLE_GYRO_LPF,
-    TABLE_PID_DELTA_METHOD,
 } lookupTableIndex_e;
 
 static const lookupTableEntry_t lookupTables[] = {
@@ -443,7 +434,6 @@ static const lookupTableEntry_t lookupTables[] = {
     { lookupTableSerialRX, sizeof(lookupTableSerialRX) / sizeof(char *) },
     { lookupTableGyroFilter, sizeof(lookupTableGyroFilter) / sizeof(char *) },
     { lookupTableGyroLpf, sizeof(lookupTableGyroLpf) / sizeof(char *) },
-    { lookupTablePidDeltaMethod, sizeof(lookupTablePidDeltaMethod) / sizeof(char *) },
 };
 
 #define VALUE_TYPE_OFFSET 0
@@ -701,10 +691,8 @@ const clivalue_t valueTable[] = {
     { "i_vel",                      VAR_UINT8  | PROFILE_VALUE, .config.minmax = { PID_MIN,  PID_MAX } , PG_PID_PROFILE, offsetof(pidProfile_t, I8[PIDVEL])},
     { "d_vel",                      VAR_UINT8  | PROFILE_VALUE, .config.minmax = { PID_MIN,  PID_MAX } , PG_PID_PROFILE, offsetof(pidProfile_t, D8[PIDVEL])},
 
-    { "pid_delta_method",           VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP,  .config.lookup = { TABLE_PID_DELTA_METHOD }, PG_PID_PROFILE, offsetof(pidProfile_t, deltaMethod) },
     { "yaw_p_limit",                VAR_UINT16 | PROFILE_VALUE, .config.minmax = { YAW_P_LIMIT_MIN, YAW_P_LIMIT_MAX } , PG_PID_PROFILE, offsetof(pidProfile_t, yaw_p_limit)},
-    { "yaw_lpf",                    VAR_UINT16 | PROFILE_VALUE, .config.minmax = {0, 500 } , PG_PID_PROFILE, offsetof(pidProfile_t, yaw_lpf)},
-    { "dterm_cut_hz",               VAR_UINT16 | PROFILE_VALUE, .config.minmax = {0, 500 } , PG_PID_PROFILE, offsetof(pidProfile_t, dterm_lpf)},
+    { "dterm_cut_hz",               VAR_UINT16 | PROFILE_VALUE, .config.minmax = {0, 500 } , PG_PID_PROFILE, offsetof(pidProfile_t, dterm_cut_hz)},
 
 #ifdef GTUNE
     { "gtune_loP_rll",              VAR_UINT8  | PROFILE_VALUE, .config.minmax = { 10,  200 } , PG_GTUNE_CONFIG, offsetof(gtuneConfig_t, gtune_lolimP[FD_ROLL])},
@@ -933,10 +921,10 @@ static void cliSerial(char *cmdline)
             cliPrintf("serial %d %d %ld %ld %ld %ld\r\n" ,
                 serialConfig()->portConfigs[i].identifier,
                 serialConfig()->portConfigs[i].functionMask,
-                baudRates[serialConfig()->portConfigs[i].baudRates[0]],
-                baudRates[serialConfig()->portConfigs[i].baudRates[1]],
-                baudRates[serialConfig()->portConfigs[i].baudRates[2]],
-                baudRates[serialConfig()->portConfigs[i].baudRates[3]]
+                baudRates[serialConfig()->portConfigs[i].msp_baudrateIndex],
+                baudRates[serialConfig()->portConfigs[i].gps_baudrateIndex],
+                baudRates[serialConfig()->portConfigs[i].telemetry_baudrateIndex],
+                baudRates[serialConfig()->portConfigs[i].blackbox_baudrateIndex]
             );
         }
         return;
@@ -983,25 +971,25 @@ static void cliSerial(char *cmdline)
                 if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
                     continue;
                 }
-                portConfig.baudRates[BAUDRATE_MSP_SERVER] = baudRateIndex;
+                portConfig.msp_baudrateIndex = baudRateIndex;
                 break;
             case 1:
                 if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
                     continue;
                 }
-                portConfig.baudRates[BAUDRATE_GPS] = baudRateIndex;
+                portConfig.gps_baudrateIndex = baudRateIndex;
                 break;
             case 2:
                 if (baudRateIndex != BAUD_AUTO && baudRateIndex > BAUD_115200) {
                     continue;
                 }
-                portConfig.baudRates[BAUDRATE_TELEMETRY] = baudRateIndex;
+                portConfig.telemetry_baudrateIndex = baudRateIndex;
                 break;
             case 3:
                 if (baudRateIndex < BAUD_19200 || baudRateIndex > BAUD_250000) {
                     continue;
                 }
-                portConfig.baudRates[BAUDRATE_BLACKBOX] = baudRateIndex;
+                portConfig.blackbox_baudrateIndex = baudRateIndex;
                 break;
         }
 
@@ -1278,7 +1266,7 @@ static void cliModeColor(char *cmdline)
         }
 
         for (int j = 0; j < LED_SPECIAL_COLOR_COUNT; j++) {
-            int colorIndex = specialColors()->color[j];
+            int colorIndex = specialColors(0)->color[j];
             cliPrintf("mode_color %u %u %u\r\n", LED_SPECIAL, j, colorIndex);
         }
     } else {

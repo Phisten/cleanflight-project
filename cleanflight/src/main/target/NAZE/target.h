@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Cleanflight.
  *
@@ -20,6 +19,8 @@
 
 #define TARGET_BOARD_IDENTIFIER "AFNA" // AFroNAze - NAZE might be considered misleading on Naze clones like the flip32.
 #define USE_HARDWARE_REVISION_DETECTION
+
+#define BOARD_HAS_VOLTAGE_DIVIDER
 
 #define LED0_GPIO   GPIOB
 #define LED0_PIN    Pin_3 // PB3 (LED)
@@ -72,7 +73,7 @@
 
 #define USE_FLASH_M25P16
 
-#define USE_EXTI
+#define EXTI_CALLBACK_HANDLER_COUNT 3 // MPU data ready, MAG data ready, BMP085 EOC
 
 //#define DEBUG_MPU_DATA_READY_INTERRUPT
 #define USE_MPU_DATA_READY_SIGNAL
@@ -126,15 +127,16 @@
 #define SONAR_PWM_TRIGGER_GPIO      GPIOB
 #define SONAR_PWM_ECHO_PIN          Pin_9   // PWM6 (PB9) - 5v tolerant
 #define SONAR_PWM_ECHO_GPIO         GPIOB
-#define SONAR_PWM_TRIGGER_IO        PB8
-#define SONAR_PWM_ECHO_IO           PB9
-
+#define SONAR_PWM_EXTI_LINE         EXTI_Line9
+#define SONAR_PWM_EXTI_PIN_SOURCE   GPIO_PinSource9
+#define SONAR_PWM_EXTI_IRQN         EXTI9_5_IRQn
 #define SONAR_TRIGGER_PIN           Pin_0   // RX7 (PB0) - only 3.3v ( add a 1K Ohms resistor )
 #define SONAR_TRIGGER_GPIO          GPIOB
 #define SONAR_ECHO_PIN              Pin_1   // RX8 (PB1) - only 3.3v ( add a 1K Ohms resistor )
 #define SONAR_ECHO_GPIO             GPIOB
-#define SONAR_TRIGGER_IO            PB0
-#define SONAR_ECHO_IO               PB1
+#define SONAR_EXTI_LINE             EXTI_Line1
+#define SONAR_EXTI_PIN_SOURCE       GPIO_PinSource1
+#define SONAR_EXTI_IRQN             EXTI1_IRQn
 
 #define USE_UART1
 #define USE_UART2
@@ -164,43 +166,29 @@
 // #define SOFT_I2C_PB1011 // If SOFT_I2C is enabled above, need to define pinout as well (I2C1 = PB67, I2C2 = PB1011)
 // #define SOFT_I2C_PB67
 
-
 #define USE_ADC
-#define BOARD_HAS_VOLTAGE_DIVIDER
 
-#define ADC_INSTANCE                ADC1
-#define ADC_ABP2_PERIPHERAL         RCC_APB2Periph_ADC1
-#define ADC_AHB_PERIPHERAL          RCC_AHBPeriph_DMA1
-#define ADC_DMA_CHANNEL             DMA1_Channel1
+#define CURRENT_METER_ADC_GPIO      GPIOB
+#define CURRENT_METER_ADC_GPIO_PIN  GPIO_Pin_1
+#define CURRENT_METER_ADC_CHANNEL   ADC_Channel_9
 
-#define ADC0_GPIO                   GPIOB
-#define ADC0_GPIO_PIN               GPIO_Pin_1
-#define ADC0_CHANNEL                ADC_Channel_9
+#define VBAT_ADC_GPIO               GPIOA
+#define VBAT_ADC_GPIO_PIN           GPIO_Pin_4
+#define VBAT_ADC_CHANNEL            ADC_Channel_4
 
-#define ADC1_GPIO                   GPIOA
-#define ADC1_GPIO_PIN               GPIO_Pin_4
-#define ADC1_CHANNEL                ADC_Channel_4
+#define RSSI_ADC_GPIO               GPIOA
+#define RSSI_ADC_GPIO_PIN           GPIO_Pin_1
+#define RSSI_ADC_CHANNEL            ADC_Channel_1
 
-#define ADC2_GPIO                   GPIOA
-#define ADC2_GPIO_PIN               GPIO_Pin_1
-#define ADC2_CHANNEL                ADC_Channel_1
-
-#define ADC3_GPIO                   GPIOA
-#define ADC3_GPIO_PIN               GPIO_Pin_5
-#define ADC3_CHANNEL                ADC_Channel_5
-
-#define ADC_CHANNEL_COUNT 4
-
-#define ADC_CURRENT     ADC_CHANNEL0
-#define ADC_BATTERY     ADC_CHANNEL1
-#define ADC_RSSI        ADC_CHANNEL2
-#define ADC_EXTERNAL    ADC_CHANNEL3
+#define EXTERNAL1_ADC_GPIO          GPIOA
+#define EXTERNAL1_ADC_GPIO_PIN      GPIO_Pin_5
+#define EXTERNAL1_ADC_CHANNEL       ADC_Channel_5
 
 
 #define LED_STRIP
 #define LED_STRIP_TIMER TIM3
 #define WS2811_DMA_TC_FLAG           DMA1_FLAG_TC6
-#define WS2811_DMA_HANDLER_IDENTIFER DMA1Channel6Descriptor
+#define WS2811_DMA_HANDLER_IDENTIFER DMA1_CH6_HANDLER
 
 #define GPS
 #define GTUNE
@@ -232,7 +220,3 @@
 #define BINDPLUG_PORT  GPIOB
 #define BINDPLUG_PIN   Pin_5
 #endif
-// IO - assuming all IOs on 48pin package
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC (BIT(13)|BIT(14)|BIT(15))

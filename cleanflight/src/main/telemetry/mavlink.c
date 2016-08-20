@@ -26,7 +26,7 @@
 
 #include "platform.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #ifdef TELEMETRY
 
@@ -34,7 +34,9 @@
 #include "common/axis.h"
 #include "common/color.h"
 
+#include "config/config.h"
 #include "config/parameter_group.h"
+#include "config/runtime_config.h"
 #include "config/feature.h"
 
 #include "drivers/system.h"
@@ -45,12 +47,8 @@
 #include "drivers/serial.h"
 #include "drivers/pwm_rx.h"
 
-#include "fc/rc_controls.h"
-#include "fc/fc_serial.h"
-#include "fc/config.h"
-#include "fc/runtime_config.h"
-
 #include "io/serial.h"
+#include "io/rc_controls.h"
 #include "io/gimbal.h"
 #include "io/gps.h"
 #include "io/ledstrip.h"
@@ -76,7 +74,7 @@
 
 #include "mavlink/common/mavlink.h"
 
-#include "fc/cleanflight_fc.h"
+#include "mw.h"
 
 #define TELEMETRY_MAVLINK_INITIAL_PORT_MODE MODE_TX
 #define TELEMETRY_MAVLINK_MAXRATE 50
@@ -155,7 +153,7 @@ void configureMAVLinkTelemetryPort(void)
         return;
     }
 
-    baudRate_e baudRateIndex = portConfig->baudRates[BAUDRATE_TELEMETRY];
+    baudRate_e baudRateIndex = portConfig->telemetry_baudrateIndex;
     if (baudRateIndex == BAUD_AUTO) {
         // default rate for minimOSD
         baudRateIndex = BAUD_57600;

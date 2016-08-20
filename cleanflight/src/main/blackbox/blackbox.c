@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include <platform.h>
-#include "build/version.h"
+#include "version.h"
 
 #ifdef BLACKBOX
 
@@ -30,17 +30,14 @@
 
 #include "config/parameter_group_ids.h"
 #include "config/parameter_group.h"
-#include "config/feature.h"
-#include "config/config_reset.h"
-#include "config/profile.h"
 
 #include "drivers/sensor.h"
 #include "drivers/system.h"
 #include "drivers/compass.h"
 #include "drivers/accgyro.h"
 
-#include "fc/rate_profile.h"
-#include "fc/rc_controls.h"
+#include "io/rate_profile.h"
+#include "io/rc_controls.h"
 
 #include "sensors/sensors.h"
 #include "sensors/boardalignment.h"
@@ -63,8 +60,11 @@
 #include "flight/imu.h"
 #include "flight/navigation.h"
 
-#include "fc/runtime_config.h"
-#include "fc/config.h"
+#include "config/runtime_config.h"
+#include "config/config.h"
+#include "config/feature.h"
+#include "config/profile.h"
+#include "config/config_reset.h"
 
 #include "blackbox.h"
 #include "blackbox_io.h"

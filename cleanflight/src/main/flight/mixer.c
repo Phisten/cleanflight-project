@@ -22,9 +22,9 @@
 #include <math.h>
 
 #include <platform.h>
-#include "build/debug.h"
+#include "debug.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include "common/axis.h"
 #include "common/maths.h"
@@ -43,8 +43,7 @@
 
 #include "io/gimbal.h"
 #include "io/motor_and_servo.h"
-
-#include "fc/rc_controls.h"
+#include "io/rc_controls.h"
 
 #include "sensors/sensors.h"
 #include "sensors/acceleration.h"
@@ -55,11 +54,10 @@
 #include "flight/imu.h"
 
 #include "config/parameter_group_ids.h"
+#include "config/runtime_config.h"
+#include "config/config.h"
 #include "config/feature.h"
 #include "config/config_reset.h"
-
-#include "fc/runtime_config.h"
-#include "fc/config.h"
 
 //#define MIXER_DEBUG
 

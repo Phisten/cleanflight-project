@@ -20,22 +20,22 @@
 #include "stdlib.h"
 
 #include <platform.h>
-#include "build/build_config.h"
+#include "build_config.h"
 
+#include "config/runtime_config.h"
+#include "config/config.h"
 #include "config/parameter_group.h"
 #include "config/feature.h"
 
-#include "io/statusindicator.h"
-
-#include "fc/runtime_config.h"
-#include "fc/config.h"
-#include "fc/rc_controls.h"
+#include "io/rc_controls.h"
 
 #include "drivers/gpio.h"
 #include "drivers/sound_beeper.h"
 #include "drivers/system.h"
 #include "sensors/battery.h"
 #include "sensors/sensors.h"
+
+#include "io/statusindicator.h"
 
 #ifdef GPS
 #include "io/gps.h"
@@ -218,9 +218,12 @@ void beeper(beeperMode_e mode)
 
 void beeperSilence(void)
 {
-    beeperIsOn = 0;
     BEEP_OFF;
-    warningLedBeeper(false);
+    warningLedDisable();
+    warningLedRefresh();
+
+
+    beeperIsOn = 0;
 
     beeperNextToggleTime = 0;
     beeperPos = 0;
@@ -302,7 +305,8 @@ void beeperUpdate(void)
         beeperIsOn = 1;
         if (currentBeeperEntry->sequence[beeperPos] != 0) {
             BEEP_ON;
-            warningLedBeeper(true);
+            warningLedEnable();
+            warningLedRefresh();
             // if this was arming beep then mark time (for blackbox)
             if (
                 beeperPos == 0
@@ -315,7 +319,8 @@ void beeperUpdate(void)
         beeperIsOn = 0;
         if (currentBeeperEntry->sequence[beeperPos] != 0) {
             BEEP_OFF;
-            warningLedBeeper(false);
+            warningLedDisable();
+            warningLedRefresh();
         }
     }
 

@@ -24,11 +24,12 @@
 
 #include <platform.h>
 
-#include "build/debug.h"
+#include "debug.h"
 
 #include "common/maths.h"
 #include "common/axis.h"
 
+#include "config/runtime_config.h"
 #include "config/parameter_group.h"
 #include "config/parameter_group_ids.h"
 
@@ -43,10 +44,8 @@
 
 #include "rx/rx.h"
 
+#include "io/rc_controls.h"
 #include "io/motor_and_servo.h"
-
-#include "fc/rc_controls.h"
-#include "fc/runtime_config.h"
 
 #include "flight/mixer.h"
 #include "flight/pid.h"

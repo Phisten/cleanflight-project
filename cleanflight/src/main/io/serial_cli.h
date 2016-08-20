@@ -20,6 +20,5 @@
 extern uint8_t cliMode;
 
 void cliInit(void);
-void cliEnter(serialPort_t *serialPort);
 void cliProcess(void);
 bool cliIsActiveOnPort(serialPort_t *serialPort);

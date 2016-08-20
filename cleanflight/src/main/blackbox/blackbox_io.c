@@ -22,7 +22,7 @@
 
 #include <platform.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include "common/maths.h"
 #include "common/encoding.h"
@@ -31,16 +31,11 @@
 
 #include "drivers/serial.h"
 #include "drivers/gyro_sync.h"
-#include "common/streambuf.h"
 
-
-#include "fc/rc_controls.h"
-#include "fc/fc_serial.h"
+#include "io/rc_controls.h"
 
 #include "io/serial.h"
-#include "msp/msp.h"
-#include "msp/msp_serial.h"
-
+#include "io/serial_msp.h"
 #include "common/printf.h"
 
 #include "io/flashfs.h"
@@ -563,7 +558,7 @@ bool blackboxDeviceOpen(void)
                 }
 
                 blackboxPortSharing = determinePortSharing(portConfig, FUNCTION_BLACKBOX);
-                baudRateIndex = portConfig->baudRates[BAUDRATE_BLACKBOX];
+                baudRateIndex = portConfig->blackbox_baudrateIndex;
 
                 if (baudRates[baudRateIndex] == 230400) {
                     /*
