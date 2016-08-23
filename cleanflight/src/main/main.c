@@ -720,6 +720,8 @@ int main(void) {
     setTaskEnabled(TASK_TRANSPONDER, feature(FEATURE_TRANSPONDER));
 #endif
 
+	//setTaskEnabled(TASK_RANGEFINDER, feature(FEATURE_RANGEFINDER));
+
     while (true) {
         scheduler();
         processLoopback();

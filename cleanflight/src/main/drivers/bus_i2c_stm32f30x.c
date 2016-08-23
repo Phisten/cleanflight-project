@@ -274,14 +274,13 @@ bool i2cWrite(uint8_t addr_, uint8_t reg, uint8_t data)
 bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
 {
     addr_ <<= 1;
-
     /* Test on BUSY Flag */
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_BUSY) != RESET) {
         if ((i2cTimeout--) == 0) {
             return i2cTimeoutUserCallback(I2Cx);
         }
-    }
+	}
 
     /* Configure slave address, nbytes, reload, end mode and start or stop generation */
     I2C_TransferHandling(I2Cx, addr_, 1, I2C_SoftEnd_Mode, I2C_Generate_Start_Write);
@@ -290,7 +289,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TXIS) == RESET) {
         if ((i2cTimeout--) == 0) {
-            return i2cTimeoutUserCallback(I2Cx);
+			return -3;// i2cTimeoutUserCallback(I2Cx);
         }
     }
 
@@ -301,7 +300,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TC) == RESET) {
         if ((i2cTimeout--) == 0) {
-            return i2cTimeoutUserCallback(I2Cx);
+			return -4;// i2cTimeoutUserCallback(I2Cx);
         }
     }
 
@@ -314,7 +313,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
         i2cTimeout = I2C_DEFAULT_TIMEOUT;
         while (I2C_GetFlagStatus(I2Cx, I2C_ISR_RXNE) == RESET) {
             if ((i2cTimeout--) == 0) {
-                return i2cTimeoutUserCallback(I2Cx);
+				return -5;// i2cTimeoutUserCallback(I2Cx);
             }
         }
 
@@ -331,7 +330,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_STOPF) == RESET) {
         if ((i2cTimeout--) == 0) {
-            return i2cTimeoutUserCallback(I2Cx);
+			return -6;// i2cTimeoutUserCallback(I2Cx);
         }
     }
 
