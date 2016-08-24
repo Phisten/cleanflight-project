@@ -38,6 +38,16 @@
 #define USE_MAG_DATA_READY_SIGNAL
 #define ENSURE_MAG_DATA_READY_IS_HIGH
 
+//LRF=Laser Range Finder	#20160824 LRF define
+#define LRF
+#define USE_LRF_MPU6050
+#define LRF_TRIGGER_PIN				GPIO_Pin_1	//IO1 (CH2 / GPIO) PA1
+#define LRF_TRIGGER_GPIO            GPIOA
+#define SONAR_ECHO_PIN              Pin_1   // RC_CH8 (PB1) - only 3.3v ( add a 1K Ohms resistor )
+#define SONAR_EXTI_LINE             EXTI_Line1
+#define SONAR_EXTI_PIN_SOURCE       EXTI_PinSource1
+#define SONAR_EXTI_IRQN             EXTI1_IRQn
+//---------------------------------------
 
 #define GYRO
 #define USE_GYRO_MPU6050

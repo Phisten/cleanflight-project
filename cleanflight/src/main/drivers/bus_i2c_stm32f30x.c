@@ -120,7 +120,7 @@ void i2cInitPort(I2C_TypeDef *I2Cx)
         I2C_InitStructure.I2C_AnalogFilter = I2C_AnalogFilter_Enable;
         I2C_InitStructure.I2C_DigitalFilter = 0x00;
         I2C_InitStructure.I2C_OwnAddress1 = 0x00;
-        I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+        I2C_InitStructure.I2C_Ack = I2C_Ack_Enable; // #20160823------debug0001 I2C_Ack_Enable I2C_Ack_Disable
         I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
         if (i2cOverClock) {
             I2C_InitStructure.I2C_Timing = 0x00500E30; // 1000 Khz, 72Mhz Clock, Analog Filter Delay ON, Setup 40, Hold 4.
@@ -231,6 +231,7 @@ bool i2cWrite(uint8_t addr_, uint8_t reg, uint8_t data)
         }
     }
 
+
     /* Send Register address */
     I2C_SendData(I2Cx, (uint8_t) reg);
 
@@ -278,7 +279,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_BUSY) != RESET) {
         if ((i2cTimeout--) == 0) {
-            return i2cTimeoutUserCallback(I2Cx);
+			return i2cTimeoutUserCallback(I2Cx);
         }
 	}
 
@@ -289,7 +290,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TXIS) == RESET) {
         if ((i2cTimeout--) == 0) {
-			return -3;// i2cTimeoutUserCallback(I2Cx);
+			return i2cTimeoutUserCallback(I2Cx);
         }
     }
 
@@ -300,7 +301,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TC) == RESET) {
         if ((i2cTimeout--) == 0) {
-			return -4;// i2cTimeoutUserCallback(I2Cx);
+			return i2cTimeoutUserCallback(I2Cx);
         }
     }
 
@@ -313,12 +314,13 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
         i2cTimeout = I2C_DEFAULT_TIMEOUT;
         while (I2C_GetFlagStatus(I2Cx, I2C_ISR_RXNE) == RESET) {
             if ((i2cTimeout--) == 0) {
-				return -5;// i2cTimeoutUserCallback(I2Cx);
+				return i2cTimeoutUserCallback(I2Cx);
             }
         }
 
         /* Read data from RXDR */
-        *buf = I2C_ReceiveData(I2Cx);
+		*buf = I2C_ReceiveData(I2Cx);
+
         /* Point to the next location where the byte read will be saved */
         buf++;
 
@@ -330,7 +332,7 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     i2cTimeout = I2C_DEFAULT_TIMEOUT;
     while (I2C_GetFlagStatus(I2Cx, I2C_ISR_STOPF) == RESET) {
         if ((i2cTimeout--) == 0) {
-			return -6;// i2cTimeoutUserCallback(I2Cx);
+			return i2cTimeoutUserCallback(I2Cx);
         }
     }
 
@@ -340,5 +342,79 @@ bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
     /* If all operations OK */
     return true;
 }
+
+//
+//bool i2cRead_Debug(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf)
+//{
+//	addr_ <<= 1;
+//	/* Test on BUSY Flag */
+//	i2cTimeout = I2C_DEFAULT_TIMEOUT;
+//	while (I2C_GetFlagStatus(I2Cx, I2C_ISR_BUSY) != RESET) {
+//		if ((i2cTimeout--) == 0) {
+//			return i2cTimeoutUserCallback(I2Cx);
+//		}
+//	}
+//
+//	/* Configure slave address, nbytes, reload, end mode and start or stop generation */
+//	I2C_TransferHandling(I2Cx, addr_, 1, I2C_SoftEnd_Mode, I2C_Generate_Start_Write);
+//
+//	/* Wait until TXIS flag is set */
+//	i2cTimeout = I2C_DEFAULT_TIMEOUT;
+//	while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TXIS) == RESET) {
+//		if ((i2cTimeout--) == 0) {
+//			return i2cTimeoutUserCallback(I2Cx);
+//		}
+//	}
+//
+//	/* Send Register address */
+//	I2C_SendData(I2Cx, (uint8_t)reg);
+//
+//	/* Wait until TC flag is set */
+//	i2cTimeout = I2C_DEFAULT_TIMEOUT;
+//	while (I2C_GetFlagStatus(I2Cx, I2C_ISR_TC) == RESET) {
+//		if ((i2cTimeout--) == 0) {
+//			return i2cTimeoutUserCallback(I2Cx);
+//		}
+//	}
+//
+//	/* Configure slave address, nbytes, reload, end mode and start or stop generation */
+//	I2C_TransferHandling(I2Cx, addr_, len, I2C_AutoEnd_Mode, I2C_Generate_Start_Read);
+//
+//	/* Wait until all data are received */
+//	int bufIdx = 0;
+//	while (len) {
+//		/* Wait until RXNE flag is set */
+//		i2cTimeout = I2C_DEFAULT_TIMEOUT;
+//		while (I2C_GetFlagStatus(I2Cx, I2C_ISR_RXNE) == RESET) {
+//			if ((i2cTimeout--) == 0) {
+//				return i2cTimeoutUserCallback(I2Cx);
+//			}
+//		}
+//
+//		/* Read data from RXDR */
+//		buf[bufIdx] = I2C_ReceiveData(I2Cx);
+//
+//		/* Point to the next location where the byte read will be saved */
+//		buf++;
+//
+//		/* Decrement the read bytes counter */
+//		len--;
+//		bufIdx++;
+//	}
+//
+//	/* Wait until STOPF flag is set */
+//	i2cTimeout = I2C_DEFAULT_TIMEOUT;
+//	while (I2C_GetFlagStatus(I2Cx, I2C_ISR_STOPF) == RESET) {
+//		if ((i2cTimeout--) == 0) {
+//			return i2cTimeoutUserCallback(I2Cx);
+//		}
+//	}
+//
+//	/* Clear STOPF flag */
+//	I2C_ClearFlag(I2Cx, I2C_ICR_STOPCF);
+//
+//	/* If all operations OK */
+//	return true;
+//}
 
 #endif

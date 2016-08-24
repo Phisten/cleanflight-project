@@ -617,6 +617,12 @@ void init(void)
     baroSetCalibrationCycles(CALIBRATING_BARO_CYCLES);
 #endif
 
+#ifdef LRF //Laser Range Finder
+	lrfSetCalibrationCycles(CALIBRATING_LRF_CYCLES);
+#endif
+
+
+
     // start all timers
     // TODO - not implemented yet
     timerStart();

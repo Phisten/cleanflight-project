@@ -1017,13 +1017,46 @@ static void cliSerial(char *cmdline)
 }
 
 
+
+//-----------------------------------------------------------------
+uint8_t VL53L0X_Addr = 0x2C;
+uint8_t VL53L0X_REG_SYSRANGE_START = 0x00;
+uint8_t VL53L0X_REG_IDENTIFICATION_MODEL_ID = 0xc0;
+uint8_t VL53L0X_REG_IDENTIFICATION_REVISION_ID = 0xc2;
+uint8_t VL53L0X_REG_SLAVE_DEVICE_ADDRESS = 0x8a;
+uint8_t VL53L0X_REG_RESULT_RANGE_STATUS = 0x14;
+uint8_t VL53L0X_REG_SYSRANGE_MODE_START_STOP = 0x01;
+uint8_t VL53L0X_REG_SYSRANGE_MODE_MASK = 0x0F;
+
+uint8_t VL53L0X_ReadByte(uint8_t reg)
+{
+	uint8_t in_addr = VL53L0X_Addr;
+	uint8_t buf[1];
+	buf[0] = 0;
+	i2cRead(in_addr, reg, 1, buf);
+	return buf[0];
+}
+uint8_t VL53L0X_GetDeviceAddr()
+{
+	return VL53L0X_ReadByte(VL53L0X_REG_SLAVE_DEVICE_ADDRESS);
+}
+
+uint8_t VL53L0X_GetRevisionId()
+{
+	return VL53L0X_ReadByte(VL53L0X_REG_IDENTIFICATION_REVISION_ID);
+}
+uint8_t VL53L0X_GetModelId()
+{
+	return VL53L0X_ReadByte(VL53L0X_REG_IDENTIFICATION_MODEL_ID);
+}
+
 static void cliInitRangefinder(char *cmdline) //#20160822 phis
 {
 	cliPrint("A\r\n");
 	if (isEmpty(cmdline)) {
 		cliPrint("isEmpty\r\n");
 
-		cliPrint("init ?-> Lo -> Hi\r\n");
+		cliPrint("init ? -- Lo -- Hi\r\n");
 		gpio_config_t gpioCfg;
 		gpioCfg.mode = GPIO_Mode_OUT;
 		gpioCfg.pin = GPIO_Pin_1; //PA1
@@ -1033,28 +1066,29 @@ static void cliInitRangefinder(char *cmdline) //#20160822 phis
 		delay(100);
 		digitalHi(GPIOA, gpioCfg.pin);
 
-		int VL53L0X_REG_SLAVE_DEVICE_ADDRESS = 0x8a;
-		//i2cWrite(in_addr, 0x00, 0x01); //VL53L0X_REG_SYSRANGE_START=0x00 write_byte_data_at_addr
+		delay(100);
+
+		uint8_t in_addr = 0x29; //default
+		i2cWrite(in_addr, VL53L0X_REG_SLAVE_DEVICE_ADDRESS, VL53L0X_Addr);
+
+		cliPrint("Init Rangefinder\r\n");
+
+
+
+		//uint8_t val = 0;
+		//int cnt = 0;
+		//while (cnt < 100) { // 1 second waiting time max
+		//					//Serial.println(cnt);
+		//	delay(10);
+		//	val = VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS);
+		//	if (val & 0x01) break;
+		//	cnt++;
+		//}
+		//if (val & 0x01)
+		//	cliPrint("Device status: ready\r\n");
+		//else cliPrint("Device status: not ready\r\n");
+
 	}
-	else
-	{
-		cliPrint("isNotEmpty\r\n");
-
-
-		cliPrint("init Hi\r\n");
-		gpio_config_t gpioCfg;
-		gpioCfg.mode = GPIO_Mode_OUT;
-		gpioCfg.pin = GPIO_Pin_1; //PA1
-		gpioInit(GPIOA, &gpioCfg);
-
-		digitalHi(GPIOA, gpioCfg.pin);
-	}
-
-
-
-
-
-
 	//-----------------------------------------------------
 	//GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -1068,19 +1102,7 @@ static void cliInitRangefinder(char *cmdline) //#20160822 phis
 
 	//GPIOA->BRR = GPIO_Pin_1;  // on
 
-	//gpio init------------------------
-	//gpio_config_t *config;
-	//config.pin = GPIO_Pin_1;
-	//config.mode = 0x14;// Mode_Out_OD;
-	//config.speed = GPIO_Speed_2MHz;
-	//gpioInit(GPIOA, config);
-	//---------------------------------
-
-	//void gpioInit(GPIO_TypeDef *gpio, const gpio_config_t *config);               Mode_Out_OD = 0x14,
 	//GPIO_Pin_1 PA1     
-	
-
-	cliPrint("Init Rangefinder\r\n");
 	cliPrompt();
 
 }
@@ -1088,36 +1110,11 @@ static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
 	}
-
-	//Get DEVICE_ADDRESS
-	uint8_t in_addr = 0x29;//0x29
-	uint8_t VL53L0X_REG_SLAVE_DEVICE_ADDRESS = 0x8a;
-
-	uint8_t buf[1];
-	i2cRead(in_addr, VL53L0X_REG_SLAVE_DEVICE_ADDRESS, 1, buf);
-
-	//Serial.print("Device Address: 0x");.println(val1, HEX);
-	cliPrint("Device Address: 0x");
-	cliPrintf("%X\r\n", buf[0]);
+	cliPrintf("Device Address = 0x%X, Revision Id = %d, Model Id = %d \r\n", VL53L0X_GetDeviceAddr(), VL53L0X_GetRevisionId(), VL53L0X_GetModelId());
+	cliPrintf("range status = %d", VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS));
 	cliPrompt();
 }
 
-//port from Arduino--------------- Start
-//void write_byte_data_addr(uint8_t in_addr, uint8_t data)
-//{
-//	i2cWrite(in_addr, data, data);
-//}
-//static uint8_t read_byte_data_at_addr(uint8_t in_addr, uint8_t reg)
-//{
-//	//write_byte_data_addr(in_addr, reg);
-//	i2cWrite(in_addr, reg, reg);
-//	
-//	uint8_t buf[1];
-//	i2cRead(in_addr, reg, 1, buf);
-//	uint8_t b = buf[0];
-//	//free(buf);
-//	return b;
-//}
 uint16_t makeuint16(uint16_t lsb, uint16_t msb)
 {
 	return ((msb & 0xFF) << 8) | (lsb & 0xFF);
@@ -1127,48 +1124,30 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
 	}
-	uint8_t in_addr = 0x29;//0x29
+	uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
 	cliPrint("Print Range:\r\n");
 
-	uint8_t VL53L0X_REG_SYSRANGE_START = 0x00;
-	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, 0x01); //VL53L0X_REG_SYSRANGE_START=0x00 write_byte_data_at_addr
-	delay(1000);
-	//uint8_t val = 0;
-	//int cnt = 0;
-	//while (cnt < 100) { // 1 second waiting time max
-	//	//Serial.println(cnt);
-	//	delay(10);
-	//	val = read_byte_data_at_addr(in_addr, 0x14); // VL53L0X_REG_RESULT_RANGE_STATUS=0x14
-	//	if (val & 0x01) break;
-	//	cnt++;
-	//}
-	//if (val & 0x01)
-	//	cliPrint("Device status: ready\r\n");
-	//else
-	//	cliPrint("Device status: not ready\r\n");
 
-	//read_block_data_at_addr(in_addr, 0x14, 12);
+	cliPrint("SYSRANGE_START\r\n");
+	//Start Range
+	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 
-	uint8_t VL53L0X_REG_RESULT_RANGE_STATUS = 0x14;
-	uint8_t* buf[12];
+
+	//ranging
+	uint8_t VL53L0X_REG_buf[12];
 	for (int i = 0; i < 12; i++)
-		buf[i] = i;
-	//buf[11] = 0;
-	//buf[10] = 0;
-	int readSucc = i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, buf);
-	int readSucc2=-10;
-	//readSucc2 = i2cRead(in_addr, 0x14, 12, buf);
-	//bool i2cRead(uint8_t addr_, uint8_t reg, uint8_t len, uint8_t* buf);
+	{
+		VL53L0X_REG_buf[i] = i;
+	}
 
+	int readSucc = i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
 
-	uint16_t dist = makeuint16(buf[11], buf[10]);
-
-
+	uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
 	//uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
 
-	cliPrintf("debug: readSucc=%d , readSucc2=%d buf[0~11]=", readSucc, readSucc2);
+	cliPrintf("debug: readSucc=%d, buf[0~11]=", readSucc);
 	for (int i = 0; i < 12; i++)
-		cliPrintf("%d ,", buf[i]);
+		cliPrintf("%d ,", VL53L0X_REG_buf[i]);
 	cliPrint("\r\nDevice distance: ");
 	cliPrintf("%d",dist);
 	cliPrint("mm\r\n");
@@ -1176,7 +1155,7 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 	cliPrompt();
 }
 
-
+//----------------------------------------------------------------------------------------------
 static void cliAdjustmentRange(char *cmdline)
 {
     int i, val = 0;
@@ -2394,8 +2373,8 @@ static void cliDefaults(char *cmdline)
 
 static void cliPrint(const char *str)
 {
-    while (*str)
-        bufWriterAppend(cliWriter, *str++);
+	while (*str)
+		bufWriterAppend(cliWriter, *str++);
 }
 
 static void cliPutp(void *p, char ch)
