@@ -57,6 +57,7 @@
 #include "drivers/inverter.h"
 #include "drivers/flash_m25p16.h"
 #include "drivers/sonar_hcsr04.h"
+#include "drivers/lrf_vl53l0x.h"
 #include "drivers/sdcard.h"
 #include "drivers/usb_io.h"
 #include "drivers/transponder_ir.h"
@@ -81,6 +82,7 @@
 
 #include "sensors/sensors.h"
 #include "sensors/sonar.h"
+#include "sensors/lrf.h"
 #include "sensors/barometer.h"
 #include "sensors/compass.h"
 #include "sensors/acceleration.h"
@@ -618,9 +620,10 @@ void init(void)
 #endif
 
 #ifdef LRF //Laser Range Finder
-	lrfSetCalibrationCycles(CALIBRATING_LRF_CYCLES);
+	if (feature(FEATURE_LRF)) {
+		lrfInit();
+	}
 #endif
-
 
 
     // start all timers
@@ -705,7 +708,10 @@ int main(void) {
 #endif
 #endif
 #ifdef BARO
-    setTaskEnabled(TASK_BARO, sensors(SENSOR_BARO));
+	setTaskEnabled(TASK_BARO, sensors(SENSOR_BARO));
+#endif
+#ifdef LRF
+	setTaskEnabled(TASK_LRF, sensors(SENSOR_LRF));
 #endif
 #ifdef SONAR
     setTaskEnabled(TASK_SONAR, sensors(SENSOR_SONAR));
@@ -729,6 +735,8 @@ int main(void) {
 	//setTaskEnabled(TASK_RANGEFINDER, feature(FEATURE_RANGEFINDER));
 
     while (true) {
+		//debug[3] = rand() % 1000;
+		//debug[4] = rand() % 100;
         scheduler();
         processLoopback();
     }

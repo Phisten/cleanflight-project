@@ -200,7 +200,7 @@ static const char * const featureNames[] = {
     "SERVO_TILT", "SOFTSERIAL", "GPS", "FAILSAFE",
     "SONAR", "TELEMETRY", "CURRENT_METER", "3D", "RX_PARALLEL_PWM",
     "RX_MSP", "RSSI_ADC", "LED_STRIP", "DISPLAY", "ONESHOT125",
-    "BLACKBOX", "CHANNEL_FORWARDING", "TRANSPONDER", NULL
+    "BLACKBOX", "CHANNEL_FORWARDING", "TRANSPONDER", "LRF", NULL
 };
 
 // sync this with rxFailsafeChannelMode_e
@@ -214,16 +214,17 @@ static const rxFailsafeChannelMode_e rxFailsafeModesTable[RX_FAILSAFE_TYPE_COUNT
 #ifndef CJMCU
 // sync this with sensors_e
 static const char * const sensorTypeNames[] = {
-    "GYRO", "ACC", "BARO", "MAG", "SONAR", "GPS", "GPS+MAG", NULL
+    "GYRO", "ACC", "BARO", "MAG", "SONAR", "GPS", "GPS+MAG", "LRF", NULL
 };
 
-#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG)
+#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_LRF)
 
-static const char * const sensorHardwareNames[4][11] = {
+static const char * const sensorHardwareNames[5][11] = {
     { "", "None", "MPU6050", "L3G4200D", "MPU3050", "L3GD20", "MPU6000", "MPU6500", "FAKE", NULL },
     { "", "None", "ADXL345", "MPU6050", "MMA845x", "BMA280", "LSM303DLHC", "MPU6000", "MPU6500", "FAKE", NULL },
     { "", "None", "BMP085", "MS5611", "BMP280", NULL },
-    { "", "None", "HMC5883", "AK8975", "AK8963", NULL }
+	{ "", "None", "HMC5883", "AK8975", "AK8963", NULL },
+	{ "", "None", "VL53L0X", NULL }
 };
 #endif
 
@@ -1019,13 +1020,14 @@ static void cliSerial(char *cmdline)
 
 
 //-----------------------------------------------------------------
-uint8_t VL53L0X_Addr = 0x2C;
+uint8_t VL53L0X_Addr = 0x30;
 uint8_t VL53L0X_REG_SYSRANGE_START = 0x00;
 uint8_t VL53L0X_REG_IDENTIFICATION_MODEL_ID = 0xc0;
 uint8_t VL53L0X_REG_IDENTIFICATION_REVISION_ID = 0xc2;
 uint8_t VL53L0X_REG_SLAVE_DEVICE_ADDRESS = 0x8a;
 uint8_t VL53L0X_REG_RESULT_RANGE_STATUS = 0x14;
 uint8_t VL53L0X_REG_SYSRANGE_MODE_START_STOP = 0x01;
+uint8_t VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK = 0x02;
 uint8_t VL53L0X_REG_SYSRANGE_MODE_MASK = 0x0F;
 
 uint8_t VL53L0X_ReadByte(uint8_t reg)
@@ -1072,9 +1074,9 @@ static void cliInitRangefinder(char *cmdline) //#20160822 phis
 		i2cWrite(in_addr, VL53L0X_REG_SLAVE_DEVICE_ADDRESS, VL53L0X_Addr);
 
 		cliPrint("Init Rangefinder\r\n");
+		delay(100);
 
-
-
+		
 		//uint8_t val = 0;
 		//int cnt = 0;
 		//while (cnt < 100) { // 1 second waiting time max
@@ -1106,24 +1108,39 @@ static void cliInitRangefinder(char *cmdline) //#20160822 phis
 	cliPrompt();
 
 }
+uint16_t makeuint16(uint16_t lsb, uint16_t msb)
+{
+	return ((msb & 0xFF) << 8) | (lsb & 0xFF);
+}
 static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
 	}
 	cliPrintf("Device Address = 0x%X, Revision Id = %d, Model Id = %d \r\n", VL53L0X_GetDeviceAddr(), VL53L0X_GetRevisionId(), VL53L0X_GetModelId());
 	cliPrintf("range status = %d", VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS));
+
+
+	uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
+	uint8_t VL53L0X_REG_buf[12];
+	for (int i = 0; i < 12; i++)
+		VL53L0X_REG_buf[i] = 0;
+	i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
+
+	uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
+	//uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
+	cliPrint("\r\nDevice distance: ");
+	cliPrintf("%d", dist);
+	cliPrint("mm\r\n");
+
 	cliPrompt();
 }
 
-uint16_t makeuint16(uint16_t lsb, uint16_t msb)
-{
-	return ((msb & 0xFF) << 8) | (lsb & 0xFF);
-}
 //port from Arduino--------------- End
 static void cliPrintRange(char *cmdline) //#20160822 phis
 {
-	if (isEmpty(cmdline)) {
-	}
+	int len = 0;
+	len = strlen(cmdline);
+
 	uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
 	cliPrint("Print Range:\r\n");
 
@@ -1132,13 +1149,32 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 	//Start Range
 	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 
+	int delayMs = 0;
+
+	if (len == 0)
+		delayMs = 0;
+	else if (strncasecmp(cmdline, "A", len) == 0)
+		delayMs = 45;
+	else if (strncasecmp(cmdline, "B", len) == 0)
+		delayMs = 65;
+	else if (strncasecmp(cmdline, "C", len) == 0)
+		delayMs = 105;
 
 	//ranging
 	uint8_t VL53L0X_REG_buf[12];
 	for (int i = 0; i < 12; i++)
-	{
-		VL53L0X_REG_buf[i] = i;
-	}
+		VL53L0X_REG_buf[i] = 0;
+
+	if (len == 0)
+		while (delayMs < 300) { // 300 ms waiting time max
+			delay(10); delayMs += 10;
+			if (i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf) & 0x01)
+				break;
+		}
+	else
+		delay(delayMs);
+
+	cliPrintf("delay %dms\r\n", delayMs);
 
 	int readSucc = i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
 

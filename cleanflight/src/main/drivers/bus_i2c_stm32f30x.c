@@ -120,7 +120,7 @@ void i2cInitPort(I2C_TypeDef *I2Cx)
         I2C_InitStructure.I2C_AnalogFilter = I2C_AnalogFilter_Enable;
         I2C_InitStructure.I2C_DigitalFilter = 0x00;
         I2C_InitStructure.I2C_OwnAddress1 = 0x00;
-        I2C_InitStructure.I2C_Ack = I2C_Ack_Enable; // #20160823------debug0001 I2C_Ack_Enable I2C_Ack_Disable
+        I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
         I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
         if (i2cOverClock) {
             I2C_InitStructure.I2C_Timing = 0x00500E30; // 1000 Khz, 72Mhz Clock, Analog Filter Delay ON, Setup 40, Hold 4.

@@ -21,7 +21,7 @@ typedef enum {
     SENSOR_INDEX_GYRO = 0,
     SENSOR_INDEX_ACC,
     SENSOR_INDEX_BARO,
-    SENSOR_INDEX_MAG
+	SENSOR_INDEX_MAG
 } sensorIndex_e;
 
 #define MAX_SENSORS_TO_DETECT (SENSOR_INDEX_MAG + 1)
@@ -51,6 +51,7 @@ typedef enum {
     SENSOR_SONAR = 1 << 4,
     SENSOR_GPS = 1 << 5,
     SENSOR_GPSMAG = 1 << 6,
+	SENSOR_LRF = 1 << 7,
 } sensors_e;
 
 typedef enum {
@@ -71,7 +72,7 @@ typedef struct sensorAlignmentConfig_s {
     sensor_align_e mag_align;               // mag alignment
 } sensorAlignmentConfig_t;
 
-typedef struct sensorSelectionConfig_s {
+typedef struct   {
     uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
     uint8_t mag_hardware;                   // Which mag hardware to use on boards with more than one device
     uint8_t baro_hardware;                  // Barometer hardware to use

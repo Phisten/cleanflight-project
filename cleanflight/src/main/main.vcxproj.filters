@@ -1500,17 +1500,14 @@
     <ClInclude Include="rx\xbus.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="io\rangefinder.h">
-      <Filter>標頭檔\Add</Filter>
+    <ClInclude Include="sensors\lrf.h">
+      <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="drivers\rangefinder_vl530l0x.h">
+    <ClInclude Include="drivers\lrf_vl53l0x.h">
       <Filter>標頭檔\Add</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="io\rangefinder.c">
-      <Filter>原始程式檔\Add</Filter>
-    </ClCompile>
     <ClCompile Include="sensors\acceleration.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
@@ -2009,11 +2006,15 @@
     <ClCompile Include="rx\xbus.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
-    <ClCompile Include="drivers\rangefinder_vl530l0x.c">
+    <ClCompile Include="sensors\lrf.c">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="drivers\lrf_vl53l0x.c">
       <Filter>原始程式檔\Add</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Makefile" />
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

@@ -41,6 +41,7 @@
 #include "drivers/system.h"
 #include "drivers/serial.h"
 #include "drivers/gyro_sync.h"
+#include "drivers/lrf_vl53l0x.h"
 
 #include "io/rc_controls.h"
 #include "io/rate_profile.h"
@@ -52,6 +53,7 @@
 #include "sensors/acceleration.h"
 #include "sensors/gyro.h"
 #include "sensors/battery.h"
+#include "sensors/lrf.h"
 
 #include "io/beeper.h"
 #include "io/display.h"
@@ -882,6 +884,16 @@ void taskCalculateAltitude(void)
         calculateEstimatedAltitude(currentTime);
     }}
 #endif
+
+#ifdef LRF
+void taskUpdateLrf(void)
+{
+	if (sensors(SENSOR_LRF)) {
+		lrfUpdate();
+	}
+}
+#endif
+
 
 #ifdef DISPLAY
 void taskUpdateDisplay(void)

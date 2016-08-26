@@ -1,19 +1,19 @@
 /*
- * This file is part of Cleanflight.
- *
- * Cleanflight is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Cleanflight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
- */
+* This file is part of Cleanflight.
+*
+* Cleanflight is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Cleanflight is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #pragma once
 
@@ -38,16 +38,6 @@
 #define USE_MAG_DATA_READY_SIGNAL
 #define ENSURE_MAG_DATA_READY_IS_HIGH
 
-//LRF=Laser Range Finder	#20160824 LRF define
-#define LRF
-#define USE_LRF_MPU6050
-#define LRF_TRIGGER_PIN				GPIO_Pin_1	//IO1 (CH2 / GPIO) PA1
-#define LRF_TRIGGER_GPIO            GPIOA
-#define SONAR_ECHO_PIN              Pin_1   // RC_CH8 (PB1) - only 3.3v ( add a 1K Ohms resistor )
-#define SONAR_EXTI_LINE             EXTI_Line1
-#define SONAR_EXTI_PIN_SOURCE       EXTI_PinSource1
-#define SONAR_EXTI_IRQN             EXTI1_IRQn
-//---------------------------------------
 
 #define GYRO
 #define USE_GYRO_MPU6050
@@ -59,6 +49,9 @@
 
 #define BARO
 #define USE_BARO_MS5611
+
+//Laser Range Finder
+#define LRF
 
 #define MAG
 #define USE_MAG_AK8975
@@ -88,8 +81,8 @@
 #define SERIAL_PORT_COUNT 5
 
 #ifndef UART1_GPIO
-#define UART1_TX_PIN        GPIO_Pin_9  // PA9
-#define UART1_RX_PIN        GPIO_Pin_10 // PA10
+#define UART1_TX_PIN        GPIO_Pin_9  // PA9 I2C2_SCL
+#define UART1_RX_PIN        GPIO_Pin_10 // PA10 I2C2_SDA
 #define UART1_GPIO          GPIOA
 #define UART1_GPIO_AF       GPIO_AF_7
 #define UART1_TX_PINSOURCE  GPIO_PinSource9
@@ -121,6 +114,8 @@
 
 #define USE_I2C
 #define I2C_DEVICE (I2CDEV_1) // PB6/SCL, PB7/SDA
+//#define USE_I2C1
+//#define USE_I2C2
 
 #define USE_SPI
 #define USE_SPI_DEVICE_2 // PB12,13,14,15 on AF5

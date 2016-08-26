@@ -38,6 +38,7 @@ void taskTelemetry(void);
 void taskLedStrip(void);
 void taskTransponder(void);
 void taskSystem(void);
+void taskUpdateLrf(void);
 
 cfTask_t cfTasks[TASK_COUNT] = {
     [TASK_SYSTEM] = {
@@ -135,6 +136,15 @@ cfTask_t cfTasks[TASK_COUNT] = {
         .desiredPeriod = 1000000 / 40,          // 40 Hz, every 25 ms
         .staticPriority = TASK_PRIORITY_MEDIUM,
     },
+#endif
+
+#ifdef LRF
+	[TASK_LRF] = {
+	.taskName = "LRF",
+	.taskFunc = taskUpdateLrf,
+	.desiredPeriod = 1000000 / 20,         // 20 Hz, every 50 ms
+	.staticPriority = TASK_PRIORITY_MEDIUM,
+},
 #endif
 
 #ifdef TRANSPONDER

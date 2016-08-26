@@ -221,7 +221,8 @@ endif
 
 
 INCLUDE_DIRS := $(INCLUDE_DIRS) \
-		    $(TARGET_DIR)
+		    $(TARGET_DIR) 
+# $(ROOT)/lib/main/
 
 VPATH		:= $(VPATH):$(TARGET_DIR)
 
@@ -293,6 +294,7 @@ COMMON_SRC = build_config.c \
 		   sensors/compass.c \
 		   sensors/gyro.c \
 		   sensors/initialisation.c \
+		   sensors/lrf.c \
 		   $(CMSIS_SRC) \
 		   $(DEVICE_STDPERIPH_SRC)
 
@@ -312,6 +314,7 @@ HIGHEND_SRC = \
 		   telemetry/mavlink.c \
 		   sensors/sonar.c \
 		   sensors/barometer.c \
+		   sensors/lrf.c \
 		   blackbox/blackbox.c \
 		   blackbox/blackbox_io.c
 
@@ -642,9 +645,16 @@ SPRACINGF3_SRC = \
 		   drivers/light_ws2811strip_stm32f30x.c \
 		   drivers/serial_softserial.c \
 		   drivers/sonar_hcsr04.c \
+		   drivers/lrf_vl53l0x.c \
 		   io/flashfs.c \
 		   $(HIGHEND_SRC) \
 		   $(COMMON_SRC)
+# drivers/LRF_VL53L0X_API/vl53l0x_api.c \
+# drivers/LRF_VL53L0X_API/vl53l0x_platform.c \
+# drivers/LRF_VL53L0X_API/vl53l0x_api_strings.c \
+# drivers/LRF_VL53L0X_API/vl53l0x_api_ranging.c \
+# drivers/LRF_VL53L0X_API/vl53l0x_api_core.c \
+# drivers/LRF_VL53L0X_API/vl53l0x_api_calibration.c \
 
 SPRACINGF3EVO_SRC	 = \
 		   $(STM32F30x_COMMON_SRC) \
