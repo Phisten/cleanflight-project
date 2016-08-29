@@ -732,11 +732,7 @@ int main(void) {
     setTaskEnabled(TASK_TRANSPONDER, feature(FEATURE_TRANSPONDER));
 #endif
 
-	//setTaskEnabled(TASK_RANGEFINDER, feature(FEATURE_RANGEFINDER));
-
     while (true) {
-		//debug[3] = rand() % 1000;
-		//debug[4] = rand() % 100;
         scheduler();
         processLoopback();
     }

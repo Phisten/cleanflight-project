@@ -68,7 +68,6 @@ uint16_t makeuint16____(uint16_t lsb, uint16_t msb)
 }
 void lrfUpdate(void)
 {
-	//TODO 
 	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
 	{
 		uint8_t in_addr = 0x30;//0x29 0x2C

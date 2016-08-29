@@ -407,8 +407,10 @@ void handleSmartPortTelemetry(void)
                     tmpi += 100;
                 if (FLIGHT_MODE(BARO_MODE))
                     tmpi += 200;
-                if (FLIGHT_MODE(SONAR_MODE))
-                    tmpi += 400;
+				if (FLIGHT_MODE(SONAR_MODE))
+					tmpi += 400;
+				//if (FLIGHT_MODE(AVOIDANCE_MODE))
+				//	tmpi += 400;
 
                 if (FLIGHT_MODE(GPS_HOLD_MODE))
                     tmpi += 1000;

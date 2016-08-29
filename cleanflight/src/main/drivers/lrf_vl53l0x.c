@@ -17,6 +17,8 @@ lrf_t lrf;
 
 void lrf_vl53l0x_Init(int lrfIndex)
 {
+
+	//TODO 初始化參數應封裝至lrf結構
 	int i = lrfIndex;
 
 	gpio_config_t gpioCfg;
@@ -31,6 +33,8 @@ void lrf_vl53l0x_Init(int lrfIndex)
 
 	uint8_t in_addr = 0x29; //default
 	i2cWrite(in_addr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, 0x30);
+
+	//TODO 未解決執行階段錯誤
 	//LRF_DEVICE_DEAFULT_ADDR + i + 1
 	//lrf.Enable[i] = true;
 	//lrf.device[i]->I2cDevAddr = LRF_DEVICE_DEAFULT_ADDR + i + 1;

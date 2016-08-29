@@ -140,7 +140,8 @@ static const box_t boxes[CHECKBOX_ITEM_COUNT] = {
     { "SERVO3",    BOXSERVO3,    25 },
     { "BLACKBOX",  BOXBLACKBOX,  26 },
     { "FAILSAFE",  BOXFAILSAFE,  27 },
-    { "AIR MODE",  BOXAIRMODE,   28 },
+	{ "AIR MODE",  BOXAIRMODE,   28 },
+	{ "AVOIDANCE", BOXAVOIDANCE, 29 },
 };
 
 // mask of enabled IDs, calculated on start based on enabled features. boxId_e is used as bit index.
