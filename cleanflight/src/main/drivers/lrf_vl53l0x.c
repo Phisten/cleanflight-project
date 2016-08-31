@@ -3,23 +3,27 @@
 
 #include <platform.h>
 
+#include "build_config.h"
+#include "debug.h"
+
+#include "common/axis.h"
+
 #include "drivers/system.h"
 
 #include "drivers/bus_i2c.h"
 #include "drivers/gpio.h"
-#include "drivers/lrf_vl53l0x.h"
 
-#include "debug.h"
 
 #include "sensors/lrf.h"
+#include "drivers/lrf_vl53l0x.h"
 
-lrf_t lrf;
+
 
 void lrf_vl53l0x_Init(int lrfIndex)
 {
-
+	UNUSED(lrfIndex);
 	//TODO 初始化參數應封裝至lrf結構
-	int i = lrfIndex;
+	//int i = lrfIndex;
 
 	gpio_config_t gpioCfg;
 	gpioCfg.mode = GPIO_Mode_OUT;

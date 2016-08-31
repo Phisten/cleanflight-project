@@ -1012,21 +1012,8 @@ VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev); /* usually best implemented
 
 // VL53L0X API define End -----------------------------------------------------------
 
-#define LRF_DEVICE_COUNT 1
 #define LRF_DEVICE_DEAFULT_ADDR (0x52 >> 1)
-typedef struct lrf_s {
-	//int lrfDeviceCount;
-	bool Enable[LRF_DEVICE_COUNT]; //是否啟用(啟用狀態才測試裝置是否存在) 
-	VL53L0X_DEV device[LRF_DEVICE_COUNT]; //初始化時替裝置設定的裝置資訊 (Addr)
-	GPIO_TypeDef* i2cXsdnGpioType[LRF_DEVICE_COUNT]; //初始化使用的Xsdn pin type
-	gpio_config_t i2cXsdnGpioCfg[LRF_DEVICE_COUNT]; //初始化使用的Xsdn pin Config
-	//uint8_t lrfDeviceSetupDegree[4];
 
-	// ----- i2c -----
-	//lrfOpFuncPtr setRangeingMode; //設定距離量測模式
-	//lrfOpFuncPtr rangingMeasurement; //令device開始量測(single shot mode)
-	//lrfOpFuncPtr getRangingMeasurementData; //向device取得量測結果
-} lrf_t;
 
 
 void lrf_vl53l0x_Init(int lrfIndex);

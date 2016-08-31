@@ -58,7 +58,7 @@ extern uint16_t flightModeFlags;
 #define FLIGHT_MODE_BOXID_MAP_INITIALIZER {                             \
         BOXANGLE, BOXHORIZON, BOXMAG, BOXBARO, BOXGPSHOME, BOXGPSHOLD,  \
         BOXHEADFREE, -1, BOXPASSTHRU, BOXSONAR, BOXFAILSAFE, BOXGTUNE,  \
-        BOXAVOIDANCE}  \ // #20160829 phis: for LRF
+        BOXAVOIDANCE}   // #20160829 phis: for LRF
         /**/
 
 typedef enum {

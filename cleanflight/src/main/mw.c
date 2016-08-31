@@ -675,11 +675,11 @@ void taskMainPidLoop(void)
         }
 #endif
 
-    
-    if (// If we're armed, at minimum throttle, and we do arming via the
+	// If we're armed, at minimum throttle, and we do arming via the
     // sticks, do not process yaw input from the rx.  We do this so the
     // motors do not spin up while we are trying to arm or disarm.
-    // Allow yaw control for tricopters if the user wants the servo to move even when unarmed.isUsingSticksForArming() && rcData[THROTTLE] <= rxConfig()->mincheck
+	// Allow yaw control for tricopters if the user wants the servo to move even when unarmed.
+	if (isUsingSticksForArming() && rcData[THROTTLE] <= rxConfig()->mincheck
 #ifndef USE_QUAD_MIXER_ONLY
 #ifdef USE_SERVOS
                 && !((mixerConfig()->mixerMode == MIXER_TRI || mixerConfig()->mixerMode == MIXER_CUSTOM_TRI) && mixerConfig()->tri_unarmed_servo)
@@ -696,11 +696,19 @@ void taskMainPidLoop(void)
     }
 
 #ifdef GPS
-    if (sensors(SENSOR_GPS)) {
-        if ((FLIGHT_MODE(GPS_HOME_MODE) || FLIGHT_MODE(GPS_HOLD_MODE)) && STATE(GPS_FIX_HOME)) {
-            updateGpsStateForHomeAndHoldMode();
-        }
-    }
+	if (sensors(SENSOR_GPS)) {
+		if ((FLIGHT_MODE(GPS_HOME_MODE) || FLIGHT_MODE(GPS_HOLD_MODE)) && STATE(GPS_FIX_HOME)) {
+			updateGpsStateForHomeAndHoldMode();
+		}
+	}
+#endif
+#ifdef LRF
+	if (sensors(SENSOR_LRF)) {
+		//TODO #20160831%phis104 ·s¼WAVOIDANCE_MODE¦bconfigurator
+		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE))  ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
+			updateLrfStateForAvoidanceMode();
+		}
+	}
 #endif
 
     // PID - note this is function pointer set by setPIDController()

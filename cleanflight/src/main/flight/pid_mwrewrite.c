@@ -40,11 +40,14 @@
 #include "sensors/sensors.h"
 #include "sensors/gyro.h"
 #include "sensors/acceleration.h"
+#include "sensors/lrf.h"
 
 #include "rx/rx.h"
 
 #include "io/rc_controls.h"
 #include "io/rate_profile.h"
+
+#include "debug.h"
 
 #include "flight/pid.h"
 #include "config/config_unittest.h"
@@ -170,13 +173,27 @@ void pidMultiWiiRewrite(const pidProfile_t *pidProfile, const controlRateConfig_
             if (FLIGHT_MODE(ANGLE_MODE) || FLIGHT_MODE(HORIZON_MODE)) {
                 // calculate error angle and limit the angle to the max inclination
                 // multiplication of rcCommand corresponds to changing the sticks scaling here
+
+				int32_t errorAngleTemp = 2 * rcCommand[axis];
 #ifdef GPS
-                const int32_t errorAngle = constrain(2 * rcCommand[axis] + GPS_angle[axis], -((int)max_angle_inclination), max_angle_inclination)
-                        - attitude.raw[axis] + angleTrim->raw[axis];
-#else
-                const int32_t errorAngle = constrain(2 * rcCommand[axis], -((int)max_angle_inclination), max_angle_inclination)
-                        - attitude.raw[axis] + angleTrim->raw[axis];
+				errorAngleTemp += GPS_angle[axis];
+				//TODO #20160830%phis101 : 需修改GPS與LRF同時啟動時GPS端的計算式
+				//TODO #20160830%phis101 : (需更改預期GPS座標,PID controller處GPS端不動)
+				//TODO #20160830%phis101 : (,否則會造成下輪迴圈時LRF避障與GPS定點互相競爭控制載具)
+				//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite之外沒有註記)
 #endif
+#ifdef LRF		
+				
+				if (FLIGHT_MODE(ANGLE_MODE) ){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
+					// ANGLE mode
+					errorAngleTemp += LRF_angle[axis];
+				}
+#endif
+				//#20160813 phis: 將errorAngle拆開計算 供LRF避障加入運算
+				const int32_t errorAngle = constrain(errorAngleTemp, -((int)max_angle_inclination), max_angle_inclination)
+												- attitude.raw[axis] + angleTrim->raw[axis];
+				debug[3+ axis] = errorAngle;
+
                 if (FLIGHT_MODE(ANGLE_MODE)) {
                     // ANGLE mode
                     angleRate = (errorAngle * pidProfile->P8[PIDLEVEL]) >> 4;

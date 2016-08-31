@@ -142,7 +142,7 @@ cfTask_t cfTasks[TASK_COUNT] = {
 	[TASK_LRF] = {
 	.taskName = "LRF",
 	.taskFunc = taskUpdateLrf,
-	.desiredPeriod = 1000000 / 20,         // 20 Hz, every 50 ms
+	.desiredPeriod = 1000000 / 33,         // 33 Hz, every 30.3 ms
 	.staticPriority = TASK_PRIORITY_MEDIUM,
 },
 #endif
