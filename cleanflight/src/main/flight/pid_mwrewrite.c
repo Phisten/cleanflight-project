@@ -184,7 +184,7 @@ void pidMultiWiiRewrite(const pidProfile_t *pidProfile, const controlRateConfig_
 #endif
 #ifdef LRF		
 				
-				if (FLIGHT_MODE(ANGLE_MODE) ){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
+				if (FLIGHT_MODE(ANGLE_MODE) && lrf_debug_avoidanceMode){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
 					// ANGLE mode
 					errorAngleTemp += LRF_angle[axis];
 				}

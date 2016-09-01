@@ -53,6 +53,7 @@ typedef struct lrf_s {
 
 extern int16_t LRF_angle[ANGLE_INDEX_COUNT];
 extern lrf_t lrf[LRF_DEVICE_COUNT];
+extern bool lrf_debug_avoidanceMode;
 
 void lrfInit(void);
 void lrfUpdate(void);

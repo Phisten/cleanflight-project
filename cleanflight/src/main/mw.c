@@ -557,7 +557,15 @@ void processRx(void)
         }
         if (rcModeIsActive(BOXHEADADJ)) {
             headFreeModeHold = DECIDEGREES_TO_DEGREES(attitude.values.yaw); // acquire new heading
-        }
+
+			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
+			lrf_debug_avoidanceMode = true;
+		}
+		else
+		{
+			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
+			lrf_debug_avoidanceMode = false;
+		}
     }
 #endif
 
@@ -705,7 +713,7 @@ void taskMainPidLoop(void)
 #ifdef LRF
 	if (sensors(SENSOR_LRF)) {
 		//TODO #20160831%phis104 新增AVOIDANCE_MODE在configurator
-		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE))  ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
+		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE)) ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
 			updateLrfStateForAvoidanceMode();
 		}
 	}

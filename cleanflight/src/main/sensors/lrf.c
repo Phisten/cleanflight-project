@@ -35,7 +35,7 @@
 lrf_t lrf[LRF_DEVICE_COUNT];
 
 int16_t LRF_angle[ANGLE_INDEX_COUNT] = { 0, 0 };    // it's the angles that must be applied for GPS correction
-
+bool lrf_debug_avoidanceMode = false;
 
 void lrfInit(void)
 {
@@ -68,14 +68,14 @@ void updateLrfStateForAvoidanceMode(void)
 	LRF_angle[AI_ROLL] = 0;
 	LRF_angle[AI_PITCH] = 0;
 
-	uint16_t startAvoidThres = 900;   // dist mm 
-	uint16_t endAvoidThres = 20;   // dist mm  小於此距離不迴避(雷射檢測失敗時距離會回傳20)
-	uint16_t startAvoidAngle = 35;    // 1/10 degree 起始迴避區段的最大傾角
-
+	uint16_t startAvoidThres = 1200;   // dist mm 大於此距離不迴避(VL53L0X標準檢測距離1.2m)
+	uint16_t startAvoidAngle = 40;    // 1/10 degree 起始迴避區段的最大傾角
 	uint16_t midAvoidAngleThres = 700;   // dist mm 距離多近時迴避角度達到minAvoidAngle
-	uint16_t midAvoidAngle = 120;    // 1/10 degree 中距迴避區段的最大傾角
-	uint16_t maxAvoidAngleThres = 100;   // dist mm 距離多近時迴避角度達到maxAvoidAngle
-	uint16_t maxAvoidAngle = 120;    // 1/10 degree 緊急迴避區段內的傾角
+	uint16_t midAvoidAngle = 50;    // 1/10 degree 中距迴避區段的最大傾角
+	uint16_t maxAvoidAngleThres = 200;   // dist mm 距離多近時迴避角度達到maxAvoidAngle
+	uint16_t maxAvoidAngle = 50;    // 1/10 degree 緊急迴避區段內的傾角
+
+	uint16_t endAvoidThres = 20;   // dist mm  小於此距離不迴避(雷射檢測失敗時距離會回傳20)
 
 	//TODO #20160831%phis103 需改為支援多感測器
 	uint16_t dist = lrf[0].data.range; // mm
@@ -97,7 +97,7 @@ void updateLrfStateForAvoidanceMode(void)
 		}
 		else if (dist <= maxAvoidAngleThres)
 		{
-			//緊急迴避區段 startAvoidThres ~ midAvoidAngleThres
+			//緊急迴避區段 endAvoidThres ~ midAvoidAngleThres
 			avoidAngle = maxAvoidAngle;
 		}
 		else
