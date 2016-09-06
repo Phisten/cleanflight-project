@@ -33,10 +33,24 @@
 
 //#define VL53L0X
 
+//TODO #20160906%phis106 未來改為5個感測器
 lrf_t lrf[LRF_DEVICE_COUNT];
+uint16_t lrfXsdnGpio[LRF_DEVICE_COUNT]			= { GPIO_Pin_0	,GPIO_Pin_1	,GPIO_Pin_4	,GPIO_Pin_5 };
+GPIO_TypeDef* lrfXsdnGpioType[LRF_DEVICE_COUNT] = { GPIOA		,GPIOA		,GPIOB		,GPIOB };
+
+
+uint16_t lrfAngleAlign[LRF_DEVICE_COUNT][ANGLE_INDEX_COUNT] = {
+	// [Lrf index: 0~5] [Roll: 0 / Pitch: 1]
+	[LRF_ALIGN_FRONT] = {0,-1}
+	,[LRF_ALIGN_RIGHT] = {-1,0}
+	,[LRF_ALIGN_BACK] = {0,1}
+	,[LRF_ALIGN_LEFT] = {1,0}
+	//,[LRF_ALIGN_BOTTOM] = {0,0}
+};
 
 int16_t LRF_angle[ANGLE_INDEX_COUNT] = { 0, 0 };    // 測距後避障邏輯輸出的期望傾角
 bool lrf_debug_avoidanceMode = false;
+
 
 void lrfInit(void)
 {
@@ -47,12 +61,16 @@ void lrfInit(void)
 		//GPIO_Pin_1 = PA1 藍線 ,GPIO_Pin_0 = PA0 白線
 		gpio_config_t gpioCfg;
 		gpioCfg.mode = GPIO_Mode_OUT;
-		gpioCfg.pin = GPIO_Pin_1 << i;
+		gpioCfg.pin = lrfXsdnGpio[i];
+		//if (i==1)
+		//{
+		//	gpioCfg.pin = GPIO_Pin_2;
+		//}
 		gpioCfg.speed = 1;
 
 		lrfDevice_t curLrfDevice;
 		curLrfDevice.i2cXsdnGpioCfg = gpioCfg;
-		curLrfDevice.i2cXsdnGpioType = GPIOA;
+		curLrfDevice.i2cXsdnGpioType = lrfXsdnGpioType[i];
 		curLrfDevice.i2cAddr = LRF_DEVICE_START_ADDR + i;
 
 		lrfData_t curLrfData = {0};
@@ -72,7 +90,7 @@ void lrfInit(void)
 	{
 		lrfDevice_t curLrfDevice = lrf[i].device;
 		//lrf_vl53l0x_Init(i);
-		lrf_vl53l0x_i2c_init(curLrfDevice.i2cXsdnGpioType, curLrfDevice.i2cXsdnGpioCfg, curLrfDevice.i2cAddr);
+		lrf[i].enable = lrf_vl53l0x_i2c_init(curLrfDevice.i2cXsdnGpioType, curLrfDevice.i2cXsdnGpioCfg, curLrfDevice.i2cAddr);
 	}
 	sensorsSet(SENSOR_LRF);
 }
@@ -98,39 +116,47 @@ void updateLrfStateForAvoidanceMode(void)
 
 	uint16_t endAvoidThres = 20;   // dist mm  小於此距離不迴避(雷射檢測失敗時距離會回傳20)
 
-	//TODO #20160831%phis103 需改為支援多感測器
-	uint16_t dist = lrf[0].data.range; // mm
-	float avoidP = 0;
-	uint16_t avoidAngle = 0;
-	if (dist < startAvoidThres && dist > endAvoidThres) 
+	//close #20160831%phis103 需改為支援多感測器
+	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
 	{
-		if (dist > midAvoidAngleThres)
+		if (lrf[i].enable == true)
 		{
-			//緩速(前速)迴避區段 startAvoidThres ~ midAvoidAngleThres
-			avoidP = (startAvoidThres - dist) / (float)(startAvoidThres - midAvoidAngleThres);
-			avoidAngle = (uint16_t)(startAvoidAngle * avoidP);
+			uint16_t dist = lrf[i].data.range; // mm
+			float avoidP = 0;
+			uint16_t avoidAngle = 0;
+			if (dist < startAvoidThres && dist > endAvoidThres)
+			{
+				if (dist > midAvoidAngleThres)
+				{
+					//緩速(前速)迴避區段 startAvoidThres ~ midAvoidAngleThres
+					avoidP = (startAvoidThres - dist) / (float)(startAvoidThres - midAvoidAngleThres);
+					avoidAngle = (uint16_t)(startAvoidAngle * avoidP);
+				}
+				else if (dist > maxAvoidAngleThres)
+				{
+					//中速迴避區段 midAvoidAngleThres ~ maxAvoidAngleThres
+					avoidP = (midAvoidAngleThres - dist) / (float)(midAvoidAngleThres - maxAvoidAngleThres);
+					avoidAngle = (uint16_t)((midAvoidAngle - startAvoidAngle) * avoidP) + startAvoidAngle;
+				}
+				else if (dist <= maxAvoidAngleThres)
+				{
+					//緊急迴避區段 endAvoidThres ~ midAvoidAngleThres
+					avoidAngle = maxAvoidAngle;
+				}
+				else
+				{
+					//TODO Error
+
+				}
+				//close #20160831%phis104 注意此處0與-1需根據LRF安裝位置改變
+				//TODO #20160906%phis107 注意第5個LRF用於高度感測,不處理姿態
+				LRF_angle[AI_ROLL] += lrfAngleAlign[i][AI_ROLL] * avoidAngle;  // 1/10 degree
+				LRF_angle[AI_PITCH] += lrfAngleAlign[i][AI_PITCH] * avoidAngle;  // 1/10 degree
+			}
 		}
-		else if (dist > maxAvoidAngleThres)
-		{
-			//中速迴避區段 midAvoidAngleThres ~ maxAvoidAngleThres
-			avoidP = (midAvoidAngleThres - dist) / (float)(midAvoidAngleThres - maxAvoidAngleThres);
-			avoidAngle = (uint16_t)((midAvoidAngle - startAvoidAngle) * avoidP) + startAvoidAngle;
-		}
-		else if (dist <= maxAvoidAngleThres)
-		{
-			//緊急迴避區段 endAvoidThres ~ midAvoidAngleThres
-			avoidAngle = maxAvoidAngle;
-		}
-		else
-		{
-			//TODO Error
-			
-		}
-		//TODO #20160831%phis104 注意此處0與-1需根據LRF安裝位置改變
-		LRF_angle[AI_ROLL] += 0 * avoidAngle;  // 1/10 degree
-		LRF_angle[AI_PITCH] += -1 * avoidAngle;  // 1/10 degree
 	}
-	debug[5] = LRF_angle[AI_PITCH];
+
+	//debug[5] = LRF_angle[AI_PITCH];
 }
 
 void lrfUpdate(void)

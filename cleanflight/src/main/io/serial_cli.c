@@ -1129,26 +1129,33 @@ static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
 	}
-	cliPrintf("Device Address = 0x%X, Revision Id = %d, Model Id = %d \r\n", VL53L0X_GetDeviceAddr(), VL53L0X_GetRevisionId(), VL53L0X_GetModelId());
-	cliPrintf("range status = %d", VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS));
+	//cliPrintf("Device Address = 0x%X, Revision Id = %d, Model Id = %d \r\n", VL53L0X_GetDeviceAddr(), VL53L0X_GetRevisionId(), VL53L0X_GetModelId());
+	//cliPrintf("range status = %d", VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS));
 
 
-	uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
-	uint8_t VL53L0X_REG_buf[12];
-	for (int i = 0; i < 12; i++)
-		VL53L0X_REG_buf[i] = 0;
-	i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
+	//uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
+	//uint8_t VL53L0X_REG_buf[12];
+	//for (int i = 0; i < 12; i++)
+	//	VL53L0X_REG_buf[i] = 0;
+	//i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
 
-	uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
-	//uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
-	cliPrint("\r\nDevice distance: ");
-	cliPrintf("%d", dist);
-	cliPrint("mm\r\n");
+	//uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
+	////uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
+	//cliPrint("\r\nDevice distance: ");
+	//cliPrintf("%d", dist);
+	//cliPrint("mm\r\n");
+
+	cliPrint("LRF Info:\r\n");
+	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
+	{
+		cliPrintf("LRF index:%d , enable=%d\r\n", i, lrf[i].enable);
+		cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", lrf[i].device.i2cXsdnGpioCfg.pin, lrf[i].device.i2cAddr, lrf[i].data.range);
+	}
+
 
 	cliPrompt();
 }
 
-//port from Arduino--------------- End
 static void cliPrintRange(char *cmdline) //#20160822 phis
 {
 	int len = 0;

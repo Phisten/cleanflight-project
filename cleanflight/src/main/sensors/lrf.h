@@ -4,7 +4,7 @@
 #include "drivers/gpio.h"
 
 
-#define LRF_DEVICE_COUNT 1
+#define LRF_DEVICE_COUNT 4
 #define LRF_DEVICE_START_ADDR 0x30
 
 
@@ -21,8 +21,8 @@ typedef void(*lrfOpFuncPtr)(void);    // task operation
 
 typedef enum {
 	//CW:¶¶®É°w
-	LRF_ALIGN_DEFAULT = 0,   // driver-provided alignment
-	LRF_ALIGN_FRONT,
+	//LRF_ALIGN_DEFAULT,   // driver-provided alignment
+	LRF_ALIGN_FRONT = 0,
 	LRF_ALIGN_RIGHT,
 	LRF_ALIGN_BACK,
 	LRF_ALIGN_LEFT,

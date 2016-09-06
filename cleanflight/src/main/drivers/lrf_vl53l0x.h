@@ -1019,4 +1019,4 @@ VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev); /* usually best implemented
 #define VL53L0X_DEVICE_DEAFULT_ADDR (0x52 >> 1)
 
 void lrf_vl53l0x_Init(int lrfIndex);
-void lrf_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg, uint8_t i2cAddr);
+bool lrf_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg, uint8_t i2cAddr);

@@ -192,7 +192,7 @@ void pidMultiWiiRewrite(const pidProfile_t *pidProfile, const controlRateConfig_
 				//#20160813 phis: 將errorAngle拆開計算 供LRF避障加入運算
 				const int32_t errorAngle = constrain(errorAngleTemp, -((int)max_angle_inclination), max_angle_inclination)
 												- attitude.raw[axis] + angleTrim->raw[axis];
-				debug[3+ axis] = errorAngle;
+				//debug[3+ axis] = errorAngle; //輸出角偏差
 
                 if (FLIGHT_MODE(ANGLE_MODE)) {
                     // ANGLE mode
