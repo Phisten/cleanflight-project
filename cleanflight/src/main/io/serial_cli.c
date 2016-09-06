@@ -74,6 +74,7 @@
 #include "sensors/gyro.h"
 #include "sensors/compass.h"
 #include "sensors/barometer.h"
+#include "sensors/lrf.h"
 
 #include "blackbox/blackbox.h"
 
@@ -219,11 +220,14 @@ static const char * const sensorTypeNames[] = {
 
 #define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_LRF)
 
-static const char * const sensorHardwareNames[5][11] = {
+static const char * const sensorHardwareNames[8][11] = {
     { "", "None", "MPU6050", "L3G4200D", "MPU3050", "L3GD20", "MPU6000", "MPU6500", "FAKE", NULL },
     { "", "None", "ADXL345", "MPU6050", "MMA845x", "BMA280", "LSM303DLHC", "MPU6000", "MPU6500", "FAKE", NULL },
     { "", "None", "BMP085", "MS5611", "BMP280", NULL },
 	{ "", "None", "HMC5883", "AK8975", "AK8963", NULL },
+	{ "", "None", NULL },
+	{ "", "None", NULL },
+	{ "", "None", NULL },
 	{ "", "None", "VL53L0X", NULL }
 };
 #endif
@@ -727,6 +731,15 @@ const clivalue_t valueTable[] = {
     { "magzero_x",                  VAR_INT16  | MASTER_VALUE, .config.minmax = { -32768,  32767 } , PG_SENSOR_TRIMS, offsetof(sensorTrims_t, magZero.raw[X])},
     { "magzero_y",                  VAR_INT16  | MASTER_VALUE, .config.minmax = { -32768,  32767 } , PG_SENSOR_TRIMS, offsetof(sensorTrims_t, magZero.raw[Y])},
     { "magzero_z",                  VAR_INT16  | MASTER_VALUE, .config.minmax = { -32768,  32767 } , PG_SENSOR_TRIMS, offsetof(sensorTrims_t, magZero.raw[Z])},
+
+#ifdef LRF
+//	{ "lrf_tab_size",				VAR_UINT8  | PROFILE_VALUE, .config.minmax = { 0,  BARO_SAMPLE_COUNT_MAX }, PG_BAROMETER_CONFIG, offsetof(barometerConfig_t, baro_sample_count)},
+	//{ "lrf_range",					VAR_UINT16 | PROFILE_VALUE, .config.minmax = { 0 , 65535 } , PG_LRF_CONFIG, offsetof(lrf_t, baro_noise_lpf) },
+
+	//{ "lrf_hardware",               VAR_UINT8  | MASTER_VALUE,.config.minmax = { 0,  BARO_MAX } , PG_SENSOR_SELECTION_CONFIG, offsetof(sensorSelectionConfig_t, baro_hardware) },
+
+#endif
+
 };
 
 typedef union {

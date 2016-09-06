@@ -2006,11 +2006,11 @@
     <ClCompile Include="rx\xbus.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
-    <ClCompile Include="sensors\lrf.c">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="drivers\lrf_vl53l0x.c">
       <Filter>原始程式檔\Add</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\lrf.c">
+      <Filter>原始程式檔\Src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -63,3 +63,18 @@ void lrf_vl53l0x_Init(int lrfIndex)
 	//i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP ); // | VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK
 }
 
+
+void lrf_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg , uint8_t i2cAddr)
+{
+	gpioInit(gpioType, &gpioCfg);
+	uint16_t xsdnPin = gpioCfg.pin;
+
+	digitalLo(gpioType, xsdnPin);
+	delay(100);
+	digitalHi(gpioType, xsdnPin);
+	delay(100);
+
+	uint8_t in_addr = VL53L0X_DEVICE_DEAFULT_ADDR; //default
+	i2cWrite(in_addr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, i2cAddr);
+
+}

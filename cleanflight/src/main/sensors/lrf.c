@@ -32,26 +32,47 @@
 #ifdef LRF
 
 //#define VL53L0X
+
 lrf_t lrf[LRF_DEVICE_COUNT];
 
-int16_t LRF_angle[ANGLE_INDEX_COUNT] = { 0, 0 };    // it's the angles that must be applied for GPS correction
+int16_t LRF_angle[ANGLE_INDEX_COUNT] = { 0, 0 };    // 測距後避障邏輯輸出的期望傾角
 bool lrf_debug_avoidanceMode = false;
 
 void lrfInit(void)
 {
-	//laserRanges_t laserRange;
-
-	//hcsr04_init(sonarHardware, &sonarRange);
-
-	//gpio_config_t gpioCfg;
-	//gpioCfg.mode = GPIO_Mode_OUT;
-	//gpioCfg.pin = GPIO_Pin_1; //PA1
-
-	//uint8_t addr = 0x30;
-
+	
+	//VL53L0X 參數設定
 	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
 	{
-		lrf_vl53l0x_Init(i);
+		//GPIO_Pin_1 = PA1 藍線 ,GPIO_Pin_0 = PA0 白線
+		gpio_config_t gpioCfg;
+		gpioCfg.mode = GPIO_Mode_OUT;
+		gpioCfg.pin = GPIO_Pin_1 << i;
+		gpioCfg.speed = 1;
+
+		lrfDevice_t curLrfDevice;
+		curLrfDevice.i2cXsdnGpioCfg = gpioCfg;
+		curLrfDevice.i2cXsdnGpioType = GPIOA;
+		curLrfDevice.i2cAddr = LRF_DEVICE_START_ADDR + i;
+
+		lrfData_t curLrfData = {0};
+		lrf_t curLrf = {
+			.device = curLrfDevice,
+			.data = curLrfData,
+			.enable = true
+		};
+		//curLrf.device = curLrfDevice;
+		//curLrf.data = curLrfData;
+		//curLrf.enable = true;
+		lrf[i] = curLrf;
+	}
+
+	//LRF裝置初始化
+	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
+	{
+		lrfDevice_t curLrfDevice = lrf[i].device;
+		//lrf_vl53l0x_Init(i);
+		lrf_vl53l0x_i2c_init(curLrfDevice.i2cXsdnGpioType, curLrfDevice.i2cXsdnGpioCfg, curLrfDevice.i2cAddr);
 	}
 	sensorsSet(SENSOR_LRF);
 }
@@ -71,9 +92,9 @@ void updateLrfStateForAvoidanceMode(void)
 	uint16_t startAvoidThres = 1200;   // dist mm 大於此距離不迴避(VL53L0X標準檢測距離1.2m)
 	uint16_t startAvoidAngle = 40;    // 1/10 degree 起始迴避區段的最大傾角
 	uint16_t midAvoidAngleThres = 700;   // dist mm 距離多近時迴避角度達到minAvoidAngle
-	uint16_t midAvoidAngle = 50;    // 1/10 degree 中距迴避區段的最大傾角
+	uint16_t midAvoidAngle = 80;    // 1/10 degree 中距迴避區段的最大傾角
 	uint16_t maxAvoidAngleThres = 200;   // dist mm 距離多近時迴避角度達到maxAvoidAngle
-	uint16_t maxAvoidAngle = 50;    // 1/10 degree 緊急迴避區段內的傾角
+	uint16_t maxAvoidAngle = 80;    // 1/10 degree 緊急迴避區段內的傾角
 
 	uint16_t endAvoidThres = 20;   // dist mm  小於此距離不迴避(雷射檢測失敗時距離會回傳20)
 
@@ -116,7 +137,13 @@ void lrfUpdate(void)
 {
 	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
 	{
+		if (lrf[i].enable == false)
+		{
+			continue;
+		}
+
 		uint8_t in_addr = 0x30;//0x29 0x2C
+		in_addr = lrf[i].device.i2cAddr;
 		uint8_t VL53L0X_REG_buf[12];
 		for (int i = 0; i < 12; i++)
 			VL53L0X_REG_buf[i] = 0;
@@ -125,7 +152,7 @@ void lrfUpdate(void)
 		uint16_t dist = makeuint16____(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
 		lrf[i].data.range = dist;
 
-		if (dist <= 20)
+		if (dist <= VL53L0X_MIN_OF_RANGE)
 		{
 			debug[2 + i] = dist;
 		}
@@ -140,9 +167,6 @@ void lrfUpdate(void)
 		}
 
 		i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
-		//if (lrf.Enable[i])
-		//{
-		//}
 	}
 	
 

@@ -3,6 +3,11 @@
 
 #include "drivers/gpio.h"
 
+
+#define LRF_DEVICE_COUNT 1
+#define LRF_DEVICE_START_ADDR 0x30
+
+
 //lrf = Laser Range Finder
 
 typedef enum {
@@ -29,11 +34,12 @@ typedef enum {
 	//LRF_ALIGN_Z_CW0_DEG_X_CW90_DEG = 5
 } lrf_align_e;
 
-#define LRF_DEVICE_COUNT 1
+
+
 typedef struct lrfDevice_s {
 	GPIO_TypeDef* i2cXsdnGpioType; //﹍てㄏノXsdn pin type
 	gpio_config_t i2cXsdnGpioCfg; //﹍てㄏノXsdn pin Config
-
+	uint8_t i2cAddr;
 	//lrfOpFuncPtr init; //砞﹚禯瞒秖代家Α
 } lrfDevice_t;
 typedef struct lrfData_s {
@@ -43,7 +49,7 @@ typedef struct lrfData_s {
 typedef struct lrf_s {
 	//int lrfDeviceCount;
 	bool enable; //琌币ノ
-
+	lrfDevice_t device;
 	lrfData_t data;
 	// ----- i2c -----
 	//lrfOpFuncPtr setRangeingMode; //砞﹚禯瞒秖代家Α
