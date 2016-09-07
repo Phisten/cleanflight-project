@@ -50,6 +50,7 @@
 #include "drivers/timer.h"
 #include "drivers/pwm_rx.h"
 #include "drivers/sdcard.h"
+#include "drivers/lrf_vl53l0x.h"
 
 #include "drivers/buf_writer.h"
 
@@ -132,6 +133,7 @@ static void cliSave(char *cmdline);
 static void cliSerial(char *cmdline);
 static void cliInitRangefinder(char *cmdline); //#20160822 phis
 static void cliGetRangefinderData(char *cmdline); //#20160822 phis
+static void cliSetRangefinderData(char *cmdline); //#20160906 phis
 static void cliPrintRange(char *cmdline); //#20160822 phis
 
 
@@ -334,7 +336,8 @@ const clicmd_t cmdTable[] = {
 	//#20160822 Phisten add debug laser -----------------------------------------------------------
 	CLI_COMMAND_DEF("pRng", "Print Laser Rangefinder data", NULL, cliPrintRange),
 	CLI_COMMAND_DEF("iRng", "Init Laser Rangefinder", NULL, cliInitRangefinder),
-	CLI_COMMAND_DEF("gRng", "Get Laser Rangefinder data", NULL, cliGetRangefinderData),
+	CLI_COMMAND_DEF("gRng", "Get Laser Rangefinder reg value", NULL, cliGetRangefinderData),
+	CLI_COMMAND_DEF("sRng", "Set Laser Rangefinder reg value", NULL, cliSetRangefinderData),
 	// --------------------------------------------------------------------------------------------
 };
 #define CMD_COUNT (sizeof(cmdTable) / sizeof(clicmd_t))
@@ -1034,14 +1037,7 @@ static void cliSerial(char *cmdline)
 
 //-----------------------------------------------------------------
 uint8_t VL53L0X_Addr = 0x30;
-uint8_t VL53L0X_REG_SYSRANGE_START = 0x00;
-uint8_t VL53L0X_REG_IDENTIFICATION_MODEL_ID = 0xc0;
-uint8_t VL53L0X_REG_IDENTIFICATION_REVISION_ID = 0xc2;
 uint8_t VL53L0X_REG_SLAVE_DEVICE_ADDRESS = 0x8a;
-uint8_t VL53L0X_REG_RESULT_RANGE_STATUS = 0x14;
-uint8_t VL53L0X_REG_SYSRANGE_MODE_START_STOP = 0x01;
-uint8_t VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK = 0x02;
-uint8_t VL53L0X_REG_SYSRANGE_MODE_MASK = 0x0F;
 
 uint8_t VL53L0X_ReadByte(uint8_t reg)
 {
@@ -1128,87 +1124,121 @@ uint16_t makeuint16(uint16_t lsb, uint16_t msb)
 static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
+		cliPrint("LRF Info:\r\n");
+		for (int i = 0; i < LRF_DEVICE_COUNT; i++)
+		{
+			cliPrintf("LRF index:%d , enable=%d\r\n", i, lrf[i].enable);
+			cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", lrf[i].device.i2cXsdnGpioCfg.pin, lrf[i].device.i2cAddr, lrf[i].data.range);
+		}
 	}
-	//cliPrintf("Device Address = 0x%X, Revision Id = %d, Model Id = %d \r\n", VL53L0X_GetDeviceAddr(), VL53L0X_GetRevisionId(), VL53L0X_GetModelId());
-	//cliPrintf("range status = %d", VL53L0X_ReadByte(VL53L0X_REG_RESULT_RANGE_STATUS));
-
-
-	//uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
-	//uint8_t VL53L0X_REG_buf[12];
-	//for (int i = 0; i < 12; i++)
-	//	VL53L0X_REG_buf[i] = 0;
-	//i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
-
-	//uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
-	////uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
-	//cliPrint("\r\nDevice distance: ");
-	//cliPrintf("%d", dist);
-	//cliPrint("mm\r\n");
-
-	cliPrint("LRF Info:\r\n");
-	for (int i = 0; i < LRF_DEVICE_COUNT; i++)
+	else
 	{
-		cliPrintf("LRF index:%d , enable=%d\r\n", i, lrf[i].enable);
-		cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", lrf[i].device.i2cXsdnGpioCfg.pin, lrf[i].device.i2cAddr, lrf[i].data.range);
+		//int len = strlen(cmdline);
+		int reg = atoi(cmdline);
+		uint8_t regData = 0;
+		i2cRead(LRF_DEVICE_START_ADDR, reg, 1, &regData);
+		cliPrintf("read reg:%d = %d\r\n", reg, regData);
+
+
 	}
+	cliPrompt();
+}
+static void cliSetRangefinderData(char *cmdline) //#20160822 phis
+{
+	if (isEmpty(cmdline)) {
+		cliPrintf("input: reg and value\r\n");
 
 
+	}
+	else
+	{
+		//int len = strlen(cmdline);
+		int reg = atoi(cmdline);
+
+		char *ptr = cmdline;
+		ptr = strchr(ptr, ' ');
+		ptr++;
+		uint8_t regValue = atoi(ptr);
+
+		bool setSucc = i2cWrite(LRF_DEVICE_START_ADDR, reg, regValue);
+		cliPrintf("set %s ( reg:%d = %d )\r\n", setSucc == true ? "true" : "false", reg, regValue);
+	}
 	cliPrompt();
 }
 
 static void cliPrintRange(char *cmdline) //#20160822 phis
 {
-	int len = 0;
-	len = strlen(cmdline);
+	//int len = 0;
+	//len = strlen(cmdline);
+	UNUSED(cmdline);
 
-	uint8_t in_addr = VL53L0X_Addr;//0x29 0x2C
-	cliPrint("Print Range:\r\n");
-
-
-	cliPrint("SYSRANGE_START\r\n");
+	uint8_t in_addr = LRF_DEVICE_START_ADDR;//0x29 0x2C
 	//Start Range
 	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
-
-	int delayMs = 0;
-
-	if (len == 0)
-		delayMs = 0;
-	else if (strncasecmp(cmdline, "A", len) == 0)
-		delayMs = 45;
-	else if (strncasecmp(cmdline, "B", len) == 0)
-		delayMs = 65;
-	else if (strncasecmp(cmdline, "C", len) == 0)
-		delayMs = 105;
 
 	//ranging
 	uint8_t VL53L0X_REG_buf[12];
 	for (int i = 0; i < 12; i++)
 		VL53L0X_REG_buf[i] = 0;
 
-	if (len == 0)
-		while (delayMs < 300) { // 300 ms waiting time max
-			delay(10); delayMs += 10;
-			if (i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf) & 0x01)
-				break;
-		}
-	else
-		delay(delayMs);
-
-	cliPrintf("delay %dms\r\n", delayMs);
-
 	int readSucc = i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
+
+
+	cliPrintf("debug: readSucc=%d, buf[0~11]=\r\n", readSucc);
+	for (int i = 0; i < 12; i++)
+		cliPrintf("%d\t", VL53L0X_REG_buf[i]);
+	cliPrint("\r\n");
+	for (int i = 0; i < 12; i++)
+		cliPrintf("%X\t", VL53L0X_REG_buf[i]);
+	cliPrint("\r\n");
 
 	uint16_t dist = makeuint16(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
 	//uint8_t DeviceRangeStatusInternal = ((buf[0] & 0x78) >> 3);
 
-	cliPrintf("debug: readSucc=%d, buf[0~11]=", readSucc);
-	for (int i = 0; i < 12; i++)
-		cliPrintf("%d ,", VL53L0X_REG_buf[i]);
-	cliPrint("\r\nDevice distance: ");
-	cliPrintf("%d",dist);
-	cliPrint("mm\r\n");
 
-	cliPrompt();
+	// VL53L0X API start--------------------------------
+	uint8_t DeviceRangeStatus;
+	uint16_t AmbientRate;
+	uint32_t SignalRate;
+	uint16_t EffectiveSpadRtnCount;
+	uint8_t localBuffer[12];
+
+	for (int i = 0; i < 12; i++)
+		localBuffer[i] = VL53L0X_REG_buf[i];
+
+	SignalRate = (uint32_t)makeuint16(localBuffer[7], localBuffer[6]);
+	AmbientRate = makeuint16(localBuffer[9], localBuffer[8]);
+	EffectiveSpadRtnCount = makeuint16(localBuffer[3],localBuffer[2]);
+	DeviceRangeStatus = localBuffer[0];
+
+	//char* VL53L0X_DeviceErrorString[] = {
+	//	VL53L0X_STRING_DEVICEERROR_NONE , //  0  NoError  閒置?
+	//	VL53L0X_STRING_DEVICEERROR_VCSELCONTINUITYTESTFAILURE , //VCSEL = 垂直腔面發射激光器（Vertical-Cavity Surface-Emitting Laser)
+	//	VL53L0X_STRING_DEVICEERROR_VCSELWATCHDOGTESTFAILURE , //watchdog 看門狗計時器是一種電腦硬體式的計時裝置，當系統的主程式發生某些錯誤事件時
+	//										//		   ，看門狗計時器就會對系統發出重設、重新開機或關閉的信號，使系統從懸停狀態回復到正常運作狀態。
+	//	VL53L0X_STRING_DEVICEERROR_NOVHVVALUEFOUND ,
+	//	VL53L0X_STRING_DEVICEERROR_MSRCNOTARGET , // MSRC = Minimum Signal Rate Check function
+	//	VL53L0X_STRING_DEVICEERROR_SNRCHECK , // SNR = Signal-to-noise ratio
+	//	VL53L0X_STRING_DEVICEERROR_RANGEPHASECHECK ,
+	//	VL53L0X_STRING_DEVICEERROR_SIGMATHRESHOLDCHECK ,
+	//	VL53L0X_STRING_DEVICEERROR_TCC , //Target CentreCheck. = 8
+	//	VL53L0X_STRING_DEVICEERROR_PHASECONSISTENCY ,
+	//	VL53L0X_STRING_DEVICEERROR_MINCLIP ,
+	//	VL53L0X_STRING_DEVICEERROR_RANGECOMPLETE , //量測完成 = 11
+	//	VL53L0X_STRING_DEVICEERROR_ALGOUNDERFLOW , //ALGO=algorithm(演算法) 不確定
+	//	VL53L0X_STRING_DEVICEERROR_ALGOOVERFLOW ,
+	//	VL53L0X_STRING_DEVICEERROR_RANGEIGNORETHRESHOLD
+	//};
+
+	// VL53L0X API end--------------------------------
+	uint8_t deviceStatusConvert = ((DeviceRangeStatus & 0x78) >> 3);
+	cliPrintf("[  0]DeviceRangeStatus = %d ([%d]%s)\r\n", DeviceRangeStatus, deviceStatusConvert, VL53L0X_DeviceErrorString[deviceStatusConvert]);
+
+	// effectively a measure of the ambien t light
+	cliPrintf("[3,2]EffectiveSpadRtnCount = %d\r\n", EffectiveSpadRtnCount);
+	cliPrintf("[7,6]SignalRate = %d\r\n", SignalRate);
+	cliPrintf("[9,8]AmbientRate = %d\r\n", AmbientRate);
+	cliPrintf("[B,A]distance: %dmm\r\n", dist);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2587,7 +2617,7 @@ static void cliSet(char *cmdline)
             if (strncasecmp(cmdline, valueTable[i].name, strlen(valueTable[i].name)) == 0 && variableNameLength == strlen(valueTable[i].name)) {
 
                 bool changeValue = false;
-                int_float_value_t tmp;
+				int_float_value_t tmp = {0};
                 switch (valueTable[i].type & VALUE_MODE_MASK) {
                     case MODE_DIRECT: {
                             int32_t value = 0;

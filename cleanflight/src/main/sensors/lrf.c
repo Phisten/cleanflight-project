@@ -73,7 +73,7 @@ void lrfInit(void)
 		curLrfDevice.i2cXsdnGpioType = lrfXsdnGpioType[i];
 		curLrfDevice.i2cAddr = LRF_DEVICE_START_ADDR + i;
 
-		lrfData_t curLrfData = {0};
+		lrfData_t curLrfData;
 		lrf_t curLrf = {
 			.device = curLrfDevice,
 			.data = curLrfData,
@@ -177,6 +177,11 @@ void lrfUpdate(void)
 
 		uint16_t dist = makeuint16____(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
 		lrf[i].data.range = dist;
+		lrf[i].data.rangeStatus = VL53L0X_REG_buf[0];
+		lrf[i].data.deviceError = (VL53L0X_REG_buf[0] & 0x78) >> 3;
+		lrf[i].data.signalRate = (uint32_t)makeuint16____(VL53L0X_REG_buf[7], VL53L0X_REG_buf[6]);
+		lrf[i].data.ambientRate = makeuint16____(VL53L0X_REG_buf[9], VL53L0X_REG_buf[8]);
+		lrf[i].data.effectiveSpadRtnCount = makeuint16____(VL53L0X_REG_buf[3], VL53L0X_REG_buf[2]);
 
 		if (dist <= VL53L0X_MIN_OF_RANGE)
 		{
@@ -191,8 +196,10 @@ void lrfUpdate(void)
 		{
 			debug[2 + i] = dist;
 		}
+		//debug[3 + i] = lrf[i].data.deviceError;
 
-		i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
+
+		//i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 	}
 	
 

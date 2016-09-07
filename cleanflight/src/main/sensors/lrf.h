@@ -44,6 +44,11 @@ typedef struct lrfDevice_s {
 } lrfDevice_t;
 typedef struct lrfData_s {
 	uint16_t range;
+	uint8_t rangeStatus;
+	uint8_t deviceError;
+	uint16_t ambientRate;
+	uint32_t signalRate;
+	uint16_t effectiveSpadRtnCount;
 } lrfData_t;
 
 typedef struct lrf_s {

@@ -19,6 +19,103 @@ typedef uint32_t FixPoint1616_t;
 * device.
 */
 
+
+#ifndef VL53L0X_API_STRINGS_H_
+#define VL53L0X_API_STRINGS_H_
+
+//#define  VL53L0X_STRING_DEVICE_INFO_NAME          "VL53L0X cut1.0"
+//#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS0      "VL53L0X TS0"
+//#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS1      "VL53L0X TS1"
+//#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS2      "VL53L0X TS2"
+//#define  VL53L0X_STRING_DEVICE_INFO_NAME_ES1      "VL53L0X ES1 or later"
+//#define  VL53L0X_STRING_DEVICE_INFO_TYPE          "VL53L0X"
+
+/* PAL ERROR strings */
+//#define  VL53L0X_STRING_ERROR_NONE 			"No Error"
+//#define  VL53L0X_STRING_ERROR_CALIBRATION_WARNING 			"Calibration Warning Error"
+//#define  VL53L0X_STRING_ERROR_MIN_CLIPPED 			"Min clipped error"
+//#define  VL53L0X_STRING_ERROR_UNDEFINED 			"Undefined error"
+//#define  VL53L0X_STRING_ERROR_INVALID_PARAMS 			"Invalid parameters error"
+//#define  VL53L0X_STRING_ERROR_NOT_SUPPORTED 			"Not supported error"
+//#define  VL53L0X_STRING_ERROR_RANGE_ERROR 			"Range error"
+//#define  VL53L0X_STRING_ERROR_TIME_OUT 			"Time out error"
+//#define  VL53L0X_STRING_ERROR_MODE_NOT_SUPPORTED 			"Mode not supported error"
+//#define  VL53L0X_STRING_ERROR_BUFFER_TOO_SMALL 			"Buffer too small"
+//#define  VL53L0X_STRING_ERROR_GPIO_NOT_EXISTING 			"GPIO not existing"
+//#define  VL53L0X_STRING_ERROR_GPIO_FUNCTIONALITY_NOT_SUPPORTED 			"GPIO funct not supported"
+//#define  VL53L0X_STRING_ERROR_INTERRUPT_NOT_CLEARED 			"Interrupt not Cleared"
+//#define  VL53L0X_STRING_ERROR_CONTROL_INTERFACE 			"Control Interface Error"
+//#define  VL53L0X_STRING_ERROR_INVALID_COMMAND 			"Invalid Command Error"
+//#define  VL53L0X_STRING_ERROR_DIVISION_BY_ZERO 			"Division by zero Error"
+//#define  VL53L0X_STRING_ERROR_REF_SPAD_INIT 			"Reference Spad Init Error"
+//#define  VL53L0X_STRING_ERROR_NOT_IMPLEMENTED 			"Not implemented error"
+//
+//#define  VL53L0X_STRING_UNKNOW_ERROR_CODE 			"Unknown Error Code"
+
+/* Range Status */
+//#define  VL53L0X_STRING_RANGESTATUS_NONE                 "No Update"
+//#define  VL53L0X_STRING_RANGESTATUS_RANGEVALID           "Range Valid"
+//#define  VL53L0X_STRING_RANGESTATUS_SIGMA                "Sigma Fail"
+//#define  VL53L0X_STRING_RANGESTATUS_SIGNAL               "Signal Fail"
+//#define  VL53L0X_STRING_RANGESTATUS_MINRANGE             "Min Range Fail"
+//#define  VL53L0X_STRING_RANGESTATUS_PHASE                "Phase Fail"
+//#define  VL53L0X_STRING_RANGESTATUS_HW                   "Hardware Fail"
+
+
+/* VL53L0X Status */
+//#define  VL53L0X_STRING_STATE_POWERDOWN               "POWERDOWN State"
+//#define  VL53L0X_STRING_STATE_WAIT_STATICINIT		  "Wait for staticinit State"
+//#define  VL53L0X_STRING_STATE_STANDBY                 "STANDBY State"
+//#define  VL53L0X_STRING_STATE_IDLE                    "IDLE State"
+//#define  VL53L0X_STRING_STATE_RUNNING                 "RUNNING State"
+//#define  VL53L0X_STRING_STATE_UNKNOWN                 "UNKNOWN State"
+//#define  VL53L0X_STRING_STATE_ERROR                   "ERROR State"
+
+
+/* Device Specific */
+#define  VL53L0X_STRING_DEVICEERROR_NONE						"No Update"
+#define  VL53L0X_STRING_DEVICEERROR_VCSELCONTINUITYTESTFAILURE	"VCSEL Continuity Test Failure"
+//VCSEL = 垂直腔面發射激光器（Vertical-Cavity Surface-Emitting Laser)
+#define  VL53L0X_STRING_DEVICEERROR_VCSELWATCHDOGTESTFAILURE 	"VCSEL Watchdog Test Failure"
+//watchdog 看門狗計時器是一種電腦硬體式的計時裝置，當系統的主程式發生某些錯誤事件時
+//		   ，看門狗計時器就會對系統發出重設、重新開機或關閉的信號，使系統從懸停狀態回復到正常運作狀態。
+#define  VL53L0X_STRING_DEVICEERROR_NOVHVVALUEFOUND 			"No VHV Value found"
+// VHV = ??????
+#define  VL53L0X_STRING_DEVICEERROR_MSRCNOTARGET 				"MSRC No Target Error"
+// MSRC = Minimum Signal Rate Check function
+#define  VL53L0X_STRING_DEVICEERROR_SNRCHECK 					"SNR Check Exit"
+// SNR = Signal-to-noise ratio
+#define  VL53L0X_STRING_DEVICEERROR_RANGEPHASECHECK 			"Range Phase Check Error"
+#define  VL53L0X_STRING_DEVICEERROR_SIGMATHRESHOLDCHECK 		"Sigma Threshold Check Error"
+#define  VL53L0X_STRING_DEVICEERROR_TCC 						"TCC Error"
+//Target CentreCheck. = 8
+#define  VL53L0X_STRING_DEVICEERROR_PHASECONSISTENCY 			"Phase Consistency Error"
+#define  VL53L0X_STRING_DEVICEERROR_MINCLIP 					"Min Clip Error"
+#define  VL53L0X_STRING_DEVICEERROR_RANGECOMPLETE 				"Range Complete"
+//量測完成 = 11
+#define  VL53L0X_STRING_DEVICEERROR_ALGOUNDERFLOW 				"Range Algo Underflow Error"
+//ALGO=algorithm(演算法) 不確定
+#define  VL53L0X_STRING_DEVICEERROR_ALGOOVERFLOW 				"Range Algo Overlow Error"
+#define  VL53L0X_STRING_DEVICEERROR_RANGEIGNORETHRESHOLD 		"Range Ignore Threshold Error"
+#define  VL53L0X_STRING_DEVICEERROR_UNKNOWN 					"Unknown error code"
+
+/* Check Enable */
+//#define  VL53L0X_STRING_CHECKENABLE_SIGMA_FINAL_RANGE 			"SIGMA FINAL RANGE"
+//#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE 			"SIGNAL RATE FINAL RANGE"
+//#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_REF_CLIP 			"SIGNAL REF CLIP"
+//#define  VL53L0X_STRING_CHECKENABLE_RANGE_IGNORE_THRESHOLD 			"RANGE IGNORE THRESHOLD"
+//#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_RATE_MSRC 			"SIGNAL RATE MSRC"
+//#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_RATE_PRE_RANGE 			"SIGNAL RATE PRE RANGE"
+
+/* Sequence Step */
+//VL53L0X 測距流程
+#define  VL53L0X_STRING_SEQUENCESTEP_TCC			"TCC"			//(0)	Target Center Check
+#define  VL53L0X_STRING_SEQUENCESTEP_DSS			"DSS"			//(1) Dynamic Spad Selection function  (spad=Single Photon Avalanche Diodes)
+#define  VL53L0X_STRING_SEQUENCESTEP_MSRC			"MSRC"			//(2) Minimum Signal Rate Check function
+#define  VL53L0X_STRING_SEQUENCESTEP_PRE_RANGE		"PRE RANGE"		//(3) Pre-Range check
+#define  VL53L0X_STRING_SEQUENCESTEP_FINAL_RANGE	"FINAL RANGE"	//(4) Final Range Check
+#endif /* USE_EMPTY_STRING */
+
 /** VL53L0X_def.h Type definitions for VL53L0X API. **********************************/
 #ifndef _VL53L0X_DEF_H_
 #define _VL53L0X_DEF_H_
@@ -811,201 +908,17 @@ typedef uint8_t VL53L0X_SequenceStepId;
 
 #endif /* _VL53L0X_DEF_H_ */
 
-/** vl53l0_platform.h All end user OS/platform/application porting********************/
-#ifndef _VL53L0X_PLATFORM_H_
-#define _VL53L0X_PLATFORM_H_
-
-/**
-* @defgroup VL53L0X_platform_group VL53L0 Platform Functions
-* @brief    VL53L0 Platform Functions
-*  @{
-*/
-
-/**
-* @struct  VL53L0X_Dev_t
-* @brief    Generic PAL device type that does link between API and platform abstraction layer
-*
-*/
-#define VL53L0X_COMMS_I2C 1
-typedef struct {
-	VL53L0X_DevData_t Data;               /*!< embed ST Ewok Dev  data as "Data"*/
-
-										  /*!< user specific field */
-	uint8_t   I2cDevAddr;                /*!< i2c device address user specific field */
-	uint8_t   comms_type;                /*!< Type of comms : VL53L0X_COMMS_I2C or VL53L0X_COMMS_SPI */
-	uint16_t  comms_speed_khz;           /*!< Comms speed [kHz] : typically 400kHz for I2C           */
-
-} VL53L0X_Dev_t;
-
-
-/**
-* @brief   Declare the device Handle as a pointer of the structure @a VL53L0X_Dev_t.
-*
-*/
-typedef VL53L0X_Dev_t* VL53L0X_DEV;
-
-/**
-* @def PALDevDataGet
-* @brief Get ST private structure @a VL53L0X_DevData_t data access
-*
-* @param Dev       Device Handle
-* @param field     ST structure field name
-* It maybe used and as real data "ref" not just as "get" for sub-structure item
-* like PALDevDataGet(FilterData.field)[i] or PALDevDataGet(FilterData.MeasurementIndex)++
-*/
-#define PALDevDataGet(Dev, field) (Dev->Data.field)
-
-/**
-* @def PALDevDataSet(Dev, field, data)
-* @brief  Set ST private structure @a VL53L0X_DevData_t data field
-* @param Dev       Device Handle
-* @param field     ST structure field name
-* @param data      Data to be set
-*/
-#define PALDevDataSet(Dev, field, data) (Dev->Data.field)=(data)
-
-
-/**
-* @defgroup VL53L0X_registerAccess_group PAL Register Access Functions
-* @brief    PAL Register Access Functions
-*  @{
-*/
-
-/**
-* Lock comms interface to serialize all commands to a shared I2C interface for a specific device
-* @param   Dev       Device Handle
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_LockSequenceAccess(VL53L0X_DEV Dev);
-
-/**
-* Unlock comms interface to serialize all commands to a shared I2C interface for a specific device
-* @param   Dev       Device Handle
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_UnlockSequenceAccess(VL53L0X_DEV Dev);
-
-
-/**
-* Writes the supplied byte buffer to the device
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   pdata     Pointer to uint8_t buffer containing the data to be written
-* @param   count     Number of bytes in the supplied byte buffer
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_WriteMulti(VL53L0X_DEV Dev, uint8_t index, uint8_t *pdata, uint32_t count);
-
-/**
-* Reads the requested number of bytes from the device
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   pdata     Pointer to the uint8_t buffer to store read data
-* @param   count     Number of uint8_t's to read
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_ReadMulti(VL53L0X_DEV Dev, uint8_t index, uint8_t *pdata, uint32_t count);
-
-/**
-* Write single byte register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      8 bit register data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_WrByte(VL53L0X_DEV Dev, uint8_t index, uint8_t data);
-
-/**
-* Write word register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      16 bit register data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_WrWord(VL53L0X_DEV Dev, uint8_t index, uint16_t data);
-
-/**
-* Write double word (4 byte) register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      32 bit register data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_WrDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t data);
-
-/**
-* Read single byte register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      pointer to 8 bit data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_RdByte(VL53L0X_DEV Dev, uint8_t index, uint8_t *data);
-
-/**
-* Read word (2byte) register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      pointer to 16 bit data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_RdWord(VL53L0X_DEV Dev, uint8_t index, uint16_t *data);
-
-/**
-* Read dword (4byte) register
-* @param   Dev       Device Handle
-* @param   index     The register index
-* @param   data      pointer to 32 bit data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_RdDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t *data);
-
-/**
-* Threat safe Update (read/modify/write) single byte register
-*
-* Final_reg = (Initial_reg & and_data) |or_data
-*
-* @param   Dev        Device Handle
-* @param   index      The register index
-* @param   AndData    8 bit and data
-* @param   OrData     8 bit or data
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_UpdateByte(VL53L0X_DEV Dev, uint8_t index, uint8_t AndData, uint8_t OrData);
-
-/** @} end of VL53L0X_registerAccess_group */
-
-
-/**
-* @brief execute delay in all polling API call
-*
-* A typical multi-thread or RTOs implementation is to sleep the task for some 5ms (with 100Hz max rate faster polling is not needed)
-* if nothing specific is need you can define it as an empty/void macro
-* @code
-* #define VL53L0X_PollingDelay(...) (void)0
-* @endcode
-* @param Dev       Device Handle
-* @return  VL53L0X_ERROR_NONE        Success
-* @return  "Other error code"    See ::VL53L0X_Error
-*/
-VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev); /* usually best implemented as a real function */
-
-													 /** @} end of VL53L0X_platform_group */
-#endif  /* _VL53L0X_PLATFORM_H_ */
-
 
 // VL53L0X API define End -----------------------------------------------------------
+
+/*  VL53L0X 測距流程:
+VL53L0X_SEQUENCESTEP_		(VL53L0X_VcselPeriod)
+TCC			(0)	Target Center Check
+DSS			(1) Dynamic Spad Selection function  (spad=Single Photon Avalanche Diodes)
+MSRC		(2) Minimum Signal Rate Check function
+PRE_RANGE	(3) Pre-Range check
+FINAL_RANGE	(4) Final Range Check
+*/
 
 
 // 自定義參數 -----------------------------------------------------------------------
@@ -1017,6 +930,9 @@ VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev); /* usually best implemented
 #define VL53L0X_OUT_OF_RANGE (8190)
 
 #define VL53L0X_DEVICE_DEAFULT_ADDR (0x52 >> 1)
+
+extern char* VL53L0X_DeviceErrorString[];
+extern int VL53L0X_DeviceErrorCount;
 
 void lrf_vl53l0x_Init(int lrfIndex);
 bool lrf_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg, uint8_t i2cAddr);
