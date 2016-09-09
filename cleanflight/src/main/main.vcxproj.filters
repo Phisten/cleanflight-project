@@ -1500,10 +1500,10 @@
     <ClInclude Include="rx\xbus.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="sensors\lrf.h">
+    <ClInclude Include="sensors\tof.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="drivers\lrf_vl53l0x.h">
+    <ClInclude Include="drivers\tof_vl53l0x.h">
       <Filter>標頭檔\Add</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2006,10 +2006,10 @@
     <ClCompile Include="rx\xbus.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
-    <ClCompile Include="drivers\lrf_vl53l0x.c">
+    <ClCompile Include="drivers\tof_vl53l0x.c">
       <Filter>原始程式檔\Add</Filter>
     </ClCompile>
-    <ClCompile Include="sensors\lrf.c">
+    <ClCompile Include="sensors\tof.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
   </ItemGroup>

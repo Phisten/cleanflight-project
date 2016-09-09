@@ -77,8 +77,8 @@ typedef enum {
 #ifdef TRANSPONDER
     TASK_TRANSPONDER,
 #endif
-#ifdef LRF
-	TASK_LRF,
+#ifdef TOF
+	TASK_tof,
 #endif
     /* Count of real tasks */
     TASK_COUNT,

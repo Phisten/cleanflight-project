@@ -248,6 +248,7 @@ void calculateEstimatedAltitude(uint32_t currentTime)
     sonarAlt = sonarRead();
     sonarAlt = sonarCalculateAltitude(sonarAlt, getCosTiltAngle());
 
+	//TODO #20160908%phis109 分離BARO SONAR tof的定高計算  並排列優先條件
     if (sonarAlt > 0 && sonarAlt < sonarCfAltCm) {
         // just use the SONAR
         baroAlt_offset = BaroAlt - sonarAlt;
@@ -260,6 +261,10 @@ void calculateEstimatedAltitude(uint32_t currentTime)
             BaroAlt = sonarAlt * sonarTransition + BaroAlt * (1.0f - sonarTransition);
         }
     }
+#endif
+
+#ifdef TOF
+
 #endif
 
     dt = accTimeSum * 1e-6f; // delta acc reading time in seconds

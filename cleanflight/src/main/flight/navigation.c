@@ -715,9 +715,9 @@ void updateGpsWaypointsAndMode(void)
                     GPS_hold[LAT] = GPS_coord[LAT];
                     GPS_hold[LON] = GPS_coord[LON];
                     GPS_set_next_wp(&GPS_hold[LAT], &GPS_hold[LON]);
-					//TODO #20160830%phis101 : 需修改GPS與LRF同時啟動時GPS端的計算式
+					//TODO #20160830%phis101 : 需修改GPS與tof同時啟動時GPS端的計算式
 					//TODO #20160830%phis101 : (需更改預期GPS座標,PID controller處GPS端不動)
-					//TODO #20160830%phis101 : (,否則會造成下輪迴圈時LRF避障與GPS定點互相競爭控制載具)
+					//TODO #20160830%phis101 : (,否則會造成下輪迴圈時tof避障與GPS定點互相競爭控制載具)
 					//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite之外沒有註記)
                     nav_mode = NAV_MODE_POSHOLD;
                     resetNavNow = true;

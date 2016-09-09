@@ -137,7 +137,7 @@
     <ClInclude Include="drivers\pwm_mapping.h" />
     <ClInclude Include="drivers\pwm_output.h" />
     <ClInclude Include="drivers\pwm_rx.h" />
-    <ClInclude Include="drivers\lrf_vl53l0x.h" />
+    <ClInclude Include="drivers\tof_vl53l0x.h" />
     <ClInclude Include="drivers\sdcard.h" />
     <ClInclude Include="drivers\sdcard_standard.h" />
     <ClInclude Include="drivers\sensor.h" />
@@ -506,7 +506,7 @@
     <ClInclude Include="sensors\compass.h" />
     <ClInclude Include="sensors\gyro.h" />
     <ClInclude Include="sensors\initialisation.h" />
-    <ClInclude Include="sensors\lrf.h" />
+    <ClInclude Include="sensors\tof.h" />
     <ClInclude Include="sensors\sensors.h" />
     <ClInclude Include="sensors\sonar.h" />
     <ClInclude Include="stm32f30x.h" />
@@ -622,7 +622,7 @@
     <ClCompile Include="drivers\pwm_mapping.c" />
     <ClCompile Include="drivers\pwm_output.c" />
     <ClCompile Include="drivers\pwm_rx.c" />
-    <ClCompile Include="drivers\lrf_vl53l0x.c" />
+    <ClCompile Include="drivers\tof_vl53l0x.c" />
     <ClCompile Include="drivers\sdcard.c" />
     <ClCompile Include="drivers\sdcard_standard.c" />
     <ClCompile Include="drivers\serial.c" />
@@ -698,7 +698,7 @@
     <ClCompile Include="sensors\compass.c" />
     <ClCompile Include="sensors\gyro.c" />
     <ClCompile Include="sensors\initialisation.c" />
-    <ClCompile Include="sensors\lrf.c" />
+    <ClCompile Include="sensors\tof.c" />
     <ClCompile Include="sensors\sensors.c" />
     <ClCompile Include="sensors\sonar.c" />
     <ClCompile Include="target\ALIENFLIGHTF3\hardware_revision.c" />

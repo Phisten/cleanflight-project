@@ -42,6 +42,7 @@
 #include "sensors/sensors.h"
 #include "sensors/gyro.h"
 #include "sensors/acceleration.h"
+#include "sensors/tof.h"
 
 #include "rx/rx.h"
 
@@ -172,13 +173,26 @@ void pidLuxFloat(const pidProfile_t *pidProfile, const controlRateConfig_t *cont
             if (FLIGHT_MODE(ANGLE_MODE) || FLIGHT_MODE(HORIZON_MODE)) {
                 // calculate error angle and limit the angle to the max inclination
                 // multiplication of rcCommand corresponds to changing the sticks scaling here
+
+
+				int32_t errorAngleTemp = 2 * rcCommand[axis];
 #ifdef GPS
-                const float errorAngle = constrain(2 * rcCommand[axis] + GPS_angle[axis], -((int)max_angle_inclination), max_angle_inclination)
-                        - attitude.raw[axis] + angleTrim->raw[axis];
-#else
-                const float errorAngle = constrain(2 * rcCommand[axis], -((int)max_angle_inclination), max_angle_inclination)
-                        - attitude.raw[axis] + angleTrim->raw[axis];
+				errorAngleTemp += GPS_angle[axis];
+				//TODO #20160830%phis101 : 需修改GPS與tof同時啟動時GPS端的計算式
+				//TODO #20160830%phis101 : (需更改預期GPS座標,PID controller處GPS端不動)
+				//TODO #20160830%phis101 : (,否則會造成下輪迴圈時tof避障與GPS定點互相競爭控制載具)
+				//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite,luxfloat之外沒有註記)
 #endif
+#ifdef TOF		
+				if (FLIGHT_MODE(ANGLE_MODE) && tof_debug_avoidanceMode) { // && FLIGHT_MODE(AVOIDANCE_MODE)) {
+																		  // ANGLE mode
+					errorAngleTemp += tof_angle[axis];
+				}
+#endif
+
+				const int32_t errorAngle = constrain(errorAngleTemp, -((int)max_angle_inclination), max_angle_inclination)
+					- attitude.raw[axis] + angleTrim->raw[axis];
+
                 if (FLIGHT_MODE(ANGLE_MODE)) {
                     // ANGLE mode
                     angleRate = errorAngle * pidProfile->P8[PIDLEVEL] / 16.0f;

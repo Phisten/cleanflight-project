@@ -57,7 +57,7 @@
 #include "drivers/inverter.h"
 #include "drivers/flash_m25p16.h"
 #include "drivers/sonar_hcsr04.h"
-#include "drivers/lrf_vl53l0x.h"
+#include "drivers/tof_vl53l0x.h"
 #include "drivers/sdcard.h"
 #include "drivers/usb_io.h"
 #include "drivers/transponder_ir.h"
@@ -82,7 +82,7 @@
 
 #include "sensors/sensors.h"
 #include "sensors/sonar.h"
-#include "sensors/lrf.h"
+#include "sensors/tof.h"
 #include "sensors/barometer.h"
 #include "sensors/compass.h"
 #include "sensors/acceleration.h"
@@ -619,9 +619,9 @@ void init(void)
     baroSetCalibrationCycles(CALIBRATING_BARO_CYCLES);
 #endif
 
-#ifdef LRF //Laser Range Finder
-	if (feature(FEATURE_LRF)) {
-		lrfInit();
+#ifdef TOF //Laser Range Finder
+	if (feature(FEATURE_tof)) {
+		tofInit();
 	}
 #endif
 
@@ -710,8 +710,8 @@ int main(void) {
 #ifdef BARO
 	setTaskEnabled(TASK_BARO, sensors(SENSOR_BARO));
 #endif
-#ifdef LRF
-	setTaskEnabled(TASK_LRF, sensors(SENSOR_LRF));
+#ifdef TOF
+	setTaskEnabled(TASK_tof, sensors(SENSOR_tof));
 #endif
 #ifdef SONAR
     setTaskEnabled(TASK_SONAR, sensors(SENSOR_SONAR));

@@ -40,7 +40,7 @@
 #include "sensors/sensors.h"
 #include "sensors/gyro.h"
 #include "sensors/acceleration.h"
-#include "sensors/lrf.h"
+#include "sensors/tof.h"
 
 #include "rx/rx.h"
 
@@ -177,19 +177,19 @@ void pidMultiWiiRewrite(const pidProfile_t *pidProfile, const controlRateConfig_
 				int32_t errorAngleTemp = 2 * rcCommand[axis];
 #ifdef GPS
 				errorAngleTemp += GPS_angle[axis];
-				//TODO #20160830%phis101 : 需修改GPS與LRF同時啟動時GPS端的計算式
+				//TODO #20160830%phis101 : 需修改GPS與tof同時啟動時GPS端的計算式
 				//TODO #20160830%phis101 : (需更改預期GPS座標,PID controller處GPS端不動)
-				//TODO #20160830%phis101 : (,否則會造成下輪迴圈時LRF避障與GPS定點互相競爭控制載具)
-				//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite之外沒有註記)
+				//TODO #20160830%phis101 : (,否則會造成下輪迴圈時tof避障與GPS定點互相競爭控制載具)
+				//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite,luxfloat之外沒有註記)
 #endif
-#ifdef LRF		
+#ifdef TOF		
 				
-				if (FLIGHT_MODE(ANGLE_MODE) && lrf_debug_avoidanceMode){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
+				if (FLIGHT_MODE(ANGLE_MODE) && tof_debug_avoidanceMode){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
 					// ANGLE mode
-					errorAngleTemp += LRF_angle[axis];
+					errorAngleTemp += tof_angle[axis];
 				}
 #endif
-				//#20160813 phis: 將errorAngle拆開計算 供LRF避障加入運算
+				//#20160813 phis: 將errorAngle拆開計算 供tof避障加入運算
 				const int32_t errorAngle = constrain(errorAngleTemp, -((int)max_angle_inclination), max_angle_inclination)
 												- attitude.raw[axis] + angleTrim->raw[axis];
 				//debug[3+ axis] = errorAngle; //輸出角偏差

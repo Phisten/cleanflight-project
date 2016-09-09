@@ -50,7 +50,7 @@
 #include "drivers/timer.h"
 #include "drivers/pwm_rx.h"
 #include "drivers/sdcard.h"
-#include "drivers/lrf_vl53l0x.h"
+#include "drivers/tof_vl53l0x.h"
 
 #include "drivers/buf_writer.h"
 
@@ -75,7 +75,7 @@
 #include "sensors/gyro.h"
 #include "sensors/compass.h"
 #include "sensors/barometer.h"
-#include "sensors/lrf.h"
+#include "sensors/tof.h"
 
 #include "blackbox/blackbox.h"
 
@@ -203,7 +203,7 @@ static const char * const featureNames[] = {
     "SERVO_TILT", "SOFTSERIAL", "GPS", "FAILSAFE",
     "SONAR", "TELEMETRY", "CURRENT_METER", "3D", "RX_PARALLEL_PWM",
     "RX_MSP", "RSSI_ADC", "LED_STRIP", "DISPLAY", "ONESHOT125",
-    "BLACKBOX", "CHANNEL_FORWARDING", "TRANSPONDER", "LRF", NULL
+    "BLACKBOX", "CHANNEL_FORWARDING", "TRANSPONDER", "tof", NULL
 };
 
 // sync this with rxFailsafeChannelMode_e
@@ -217,10 +217,10 @@ static const rxFailsafeChannelMode_e rxFailsafeModesTable[RX_FAILSAFE_TYPE_COUNT
 #ifndef CJMCU
 // sync this with sensors_e
 static const char * const sensorTypeNames[] = {
-    "GYRO", "ACC", "BARO", "MAG", "SONAR", "GPS", "GPS+MAG", "LRF", NULL
+    "GYRO", "ACC", "BARO", "MAG", "SONAR", "GPS", "GPS+MAG", "tof", NULL
 };
 
-#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_LRF)
+#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_tof)
 
 static const char * const sensorHardwareNames[8][11] = {
     { "", "None", "MPU6050", "L3G4200D", "MPU3050", "L3GD20", "MPU6000", "MPU6500", "FAKE", NULL },
@@ -735,11 +735,11 @@ const clivalue_t valueTable[] = {
     { "magzero_y",                  VAR_INT16  | MASTER_VALUE, .config.minmax = { -32768,  32767 } , PG_SENSOR_TRIMS, offsetof(sensorTrims_t, magZero.raw[Y])},
     { "magzero_z",                  VAR_INT16  | MASTER_VALUE, .config.minmax = { -32768,  32767 } , PG_SENSOR_TRIMS, offsetof(sensorTrims_t, magZero.raw[Z])},
 
-#ifdef LRF
-//	{ "lrf_tab_size",				VAR_UINT8  | PROFILE_VALUE, .config.minmax = { 0,  BARO_SAMPLE_COUNT_MAX }, PG_BAROMETER_CONFIG, offsetof(barometerConfig_t, baro_sample_count)},
-	//{ "lrf_range",					VAR_UINT16 | PROFILE_VALUE, .config.minmax = { 0 , 65535 } , PG_LRF_CONFIG, offsetof(lrf_t, baro_noise_lpf) },
+#ifdef TOF
+//	{ "tof_tab_size",				VAR_UINT8  | PROFILE_VALUE, .config.minmax = { 0,  BARO_SAMPLE_COUNT_MAX }, PG_BAROMETER_CONFIG, offsetof(barometerConfig_t, baro_sample_count)},
+	//{ "tof_range",					VAR_UINT16 | PROFILE_VALUE, .config.minmax = { 0 , 65535 } , PG_tof_CONFIG, offsetof(tof_t, baro_noise_lpf) },
 
-	//{ "lrf_hardware",               VAR_UINT8  | MASTER_VALUE,.config.minmax = { 0,  BARO_MAX } , PG_SENSOR_SELECTION_CONFIG, offsetof(sensorSelectionConfig_t, baro_hardware) },
+	//{ "tof_hardware",               VAR_UINT8  | MASTER_VALUE,.config.minmax = { 0,  BARO_MAX } , PG_SENSOR_SELECTION_CONFIG, offsetof(sensorSelectionConfig_t, baro_hardware) },
 
 #endif
 
@@ -1124,11 +1124,11 @@ uint16_t makeuint16(uint16_t lsb, uint16_t msb)
 static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
-		cliPrint("LRF Info:\r\n");
-		for (int i = 0; i < LRF_DEVICE_COUNT; i++)
+		cliPrint("tof Info:\r\n");
+		for (int i = 0; i < TOF_DEVICE_COUNT; i++)
 		{
-			cliPrintf("LRF index:%d , enable=%d\r\n", i, lrf[i].enable);
-			cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", lrf[i].device.i2cXsdnGpioCfg.pin, lrf[i].device.i2cAddr, lrf[i].data.range);
+			cliPrintf("tof index:%d , enable=%d\r\n", i, tof[i].enable);
+			cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", tof[i].device.i2cXsdnGpioCfg.pin, tof[i].device.i2cAddr, tof[i].data.range);
 		}
 	}
 	else
@@ -1136,7 +1136,7 @@ static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 		//int len = strlen(cmdline);
 		int reg = atoi(cmdline);
 		uint8_t regData = 0;
-		i2cRead(LRF_DEVICE_START_ADDR, reg, 1, &regData);
+		i2cRead(TOF_DEVICE_START_ADDR, reg, 1, &regData);
 		cliPrintf("read reg:%d = %d\r\n", reg, regData);
 
 
@@ -1160,7 +1160,7 @@ static void cliSetRangefinderData(char *cmdline) //#20160822 phis
 		ptr++;
 		uint8_t regValue = atoi(ptr);
 
-		bool setSucc = i2cWrite(LRF_DEVICE_START_ADDR, reg, regValue);
+		bool setSucc = i2cWrite(TOF_DEVICE_START_ADDR, reg, regValue);
 		cliPrintf("set %s ( reg:%d = %d )\r\n", setSucc == true ? "true" : "false", reg, regValue);
 	}
 	cliPrompt();
@@ -1172,7 +1172,7 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 	//len = strlen(cmdline);
 	UNUSED(cmdline);
 
-	uint8_t in_addr = LRF_DEVICE_START_ADDR;//0x29 0x2C
+	uint8_t in_addr = TOF_DEVICE_START_ADDR;//0x29 0x2C
 	//Start Range
 	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 

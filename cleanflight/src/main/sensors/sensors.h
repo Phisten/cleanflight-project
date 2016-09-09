@@ -22,7 +22,7 @@ typedef enum {
     SENSOR_INDEX_ACC,
     SENSOR_INDEX_BARO,
 	SENSOR_INDEX_MAG,
-	SENSOR_INDEX_LRF = 7,
+	SENSOR_INDEX_tof = 7,
 	SENSOR_INDEX_COUNT
 } sensorIndex_e;
 
@@ -53,7 +53,7 @@ typedef enum {
     SENSOR_SONAR = 1 << 4,
     SENSOR_GPS = 1 << 5,
     SENSOR_GPSMAG = 1 << 6,
-	SENSOR_LRF = 1 << 7,
+	SENSOR_tof = 1 << 7,
 } sensors_e;
 
 typedef enum {
@@ -78,7 +78,7 @@ typedef struct   {
     uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
     uint8_t mag_hardware;                   // Which mag hardware to use on boards with more than one device
 	uint8_t baro_hardware;                  // Barometer hardware to use
-	uint8_t lrf_hardware;                   // LaserRangeFinder  hardware to use
+	uint8_t tof_hardware;                   // LaserRangeFinder  hardware to use
 } sensorSelectionConfig_t;
 
 typedef struct sensorTrims_s {

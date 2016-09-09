@@ -41,7 +41,7 @@
 #include "drivers/system.h"
 #include "drivers/serial.h"
 #include "drivers/gyro_sync.h"
-#include "drivers/lrf_vl53l0x.h"
+#include "drivers/tof_vl53l0x.h"
 
 #include "io/rc_controls.h"
 #include "io/rate_profile.h"
@@ -53,7 +53,7 @@
 #include "sensors/acceleration.h"
 #include "sensors/gyro.h"
 #include "sensors/battery.h"
-#include "sensors/lrf.h"
+#include "sensors/tof.h"
 
 #include "io/beeper.h"
 #include "io/display.h"
@@ -559,12 +559,12 @@ void processRx(void)
             headFreeModeHold = DECIDEGREES_TO_DEGREES(attitude.values.yaw); // acquire new heading
 
 			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
-			lrf_debug_avoidanceMode = true;
+			tof_debug_avoidanceMode = true;
 		}
 		else
 		{
 			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
-			lrf_debug_avoidanceMode = false;
+			tof_debug_avoidanceMode = false;
 		}
     }
 #endif
@@ -710,11 +710,11 @@ void taskMainPidLoop(void)
 		}
 	}
 #endif
-#ifdef LRF
-	if (sensors(SENSOR_LRF)) {
+#ifdef TOF
+	if (sensors(SENSOR_tof)) {
 		//TODO #20160831%phis104 新增AVOIDANCE_MODE在configurator
 		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE)) ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
-			updateLrfStateForAvoidanceMode();
+			updatetofStateForAvoidanceMode();
 		}
 	}
 #endif
@@ -894,18 +894,22 @@ void taskCalculateAltitude(void)
         || (sensors(SENSOR_BARO) && isBaroReady())
 #endif
 #if defined(SONAR)
-        || sensors(SENSOR_SONAR)
+		|| sensors(SENSOR_SONAR)
+#endif
+#if defined(tof)
+		|| (sensors(SENSOR_tof) && isAltitudetofEnable())
+//TODO #20160908%phis108 定高模式使用tof高度計前 確認定高tof是否可用的判斷式 istofAltitudeEnable()
 #endif
         ) {
         calculateEstimatedAltitude(currentTime);
     }}
 #endif
 
-#ifdef LRF
-void taskUpdateLrf(void)
+#ifdef TOF
+void taskUpdatetof(void)
 {
-	if (sensors(SENSOR_LRF)) {
-		lrfUpdate();
+	if (sensors(SENSOR_tof)) {
+		tofUpdate();
 	}
 }
 #endif

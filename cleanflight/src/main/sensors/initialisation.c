@@ -69,7 +69,7 @@
 #include "sensors/compass.h"
 #include "sensors/sonar.h"
 #include "sensors/initialisation.h"
-#include "sensors/lrf.h"
+#include "sensors/tof.h"
 
 
 #ifdef USE_HARDWARE_REVISION_DETECTION
@@ -80,7 +80,7 @@ extern gyro_t gyro;
 extern baro_t baro;
 extern acc_t acc;
 
-uint8_t detectedSensors[MAX_SENSORS_TO_DETECT] = { GYRO_NONE, ACC_NONE, BARO_NONE, MAG_NONE, 1U, 1U, 1U, LRF_NONE };
+uint8_t detectedSensors[MAX_SENSORS_TO_DETECT] = { GYRO_NONE, ACC_NONE, BARO_NONE, MAG_NONE, 1U, 1U, 1U, tof_NONE };
 
 
 const extiConfig_t *selectMPUIntExtiConfig(void)
@@ -741,8 +741,8 @@ bool sensorsAutodetect(void)
 	detectMag(sensorSelectionConfig()->mag_hardware);
 #endif
 
-#ifdef LRF
-//	detectLrf(sensorSelectionConfig()->lrf_hardware);
+#ifdef TOF
+//	detecttof(sensorSelectionConfig()->tof_hardware);
 #endif
 
     reconfigureAlignment(sensorAlignmentConfig());

@@ -43,7 +43,7 @@ typedef enum {
     SONAR_MODE      = (1 << 9),
     FAILSAFE_MODE   = (1 << 10),
 	GTUNE_MODE		= (1 << 11),
-	AVOIDANCE_MODE	= (1 << 12), // #20160829 phis: for LRF
+	AVOIDANCE_MODE	= (1 << 12), // #20160829 phis: for tof
 } flightModeFlags_e;
 
 extern uint16_t flightModeFlags;
@@ -58,7 +58,7 @@ extern uint16_t flightModeFlags;
 #define FLIGHT_MODE_BOXID_MAP_INITIALIZER {                             \
         BOXANGLE, BOXHORIZON, BOXMAG, BOXBARO, BOXGPSHOME, BOXGPSHOLD,  \
         BOXHEADFREE, -1, BOXPASSTHRU, BOXSONAR, BOXFAILSAFE, BOXGTUNE,  \
-        BOXAVOIDANCE}   // #20160829 phis: for LRF
+        BOXAVOIDANCE}   // #20160829 phis: for tof
         /**/
 
 typedef enum {

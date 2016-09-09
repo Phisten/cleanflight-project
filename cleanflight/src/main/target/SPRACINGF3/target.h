@@ -51,7 +51,7 @@
 #define USE_BARO_MS5611
 
 //Laser Range Finder
-#define LRF
+#define TOF
 
 #define MAG
 #define USE_MAG_AK8975
