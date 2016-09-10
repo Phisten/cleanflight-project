@@ -50,8 +50,8 @@
 #define BARO
 #define USE_BARO_MS5611
 
-//Laser Range Finder
-#define TOF
+//o:Time of Flight Camera   x:Laser Range Finder
+#define TOFC
 
 #define MAG
 #define USE_MAG_AK8975

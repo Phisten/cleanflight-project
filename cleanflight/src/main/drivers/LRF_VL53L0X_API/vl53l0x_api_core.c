@@ -1700,7 +1700,7 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 	const FixPoint1616_t cAmbToSignalRatioMax = 0xF0000000/
 		cAmbientEffectiveWidth_centi_ns;
 	/* Time Of Flight per mm (6.6 pico secs) */
-	const FixPoint1616_t cTOF_per_mm_ps		= 0x0006999A;
+	const FixPoint1616_t cTOFC_per_mm_ps		= 0x0006999A;
 	const uint32_t c16BitRoundingParam		= 0x00008000;
 	const FixPoint1616_t cMaxXTalk_kcps		= 0x00320000;
 	const uint32_t cPllPeriod_ps			= 1655;
@@ -1886,7 +1886,7 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 
 		/* uint32 * FixPoint1616 = FixPoint1616 */
 		deltaT_ps = pRangingMeasurementData->RangeMilliMeter *
-					cTOF_per_mm_ps;
+					cTOFC_per_mm_ps;
 
 		/*
 		 * vcselRate - xtalkCompRate

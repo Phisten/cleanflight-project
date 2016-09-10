@@ -1323,64 +1323,7 @@
     <ClInclude Include="target\COLIBRI_RACE\system_stm32f30x.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="target\PORT103R\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\OLIMEXINO\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\IRCFUSIONF3\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\RMDO\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\STM32F3DISCOVERY\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\NAZE\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\SPARKY\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\SPRACINGF3MINI\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\SPRACINGF3EVO\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\NAZE32PRO\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\ALIENFLIGHTF3\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\CC3D\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\LUX_RACE\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\CHEBUZZF3\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
     <ClInclude Include="target\SPRACINGF3\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\CJMCU\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\MOTOLAB\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\COLIBRI_RACE\target.h">
-      <Filter>標頭檔\Src</Filter>
-    </ClInclude>
-    <ClInclude Include="target\EUSTM32F103RC\target.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
     <ClInclude Include="telemetry\telemetry.h">
@@ -1500,10 +1443,10 @@
     <ClInclude Include="rx\xbus.h">
       <Filter>標頭檔\Src</Filter>
     </ClInclude>
-    <ClInclude Include="sensors\tof.h">
-      <Filter>標頭檔\Src</Filter>
+    <ClInclude Include="drivers\tofc_vl53l0x.h">
+      <Filter>標頭檔\Add</Filter>
     </ClInclude>
-    <ClInclude Include="drivers\tof_vl53l0x.h">
+    <ClInclude Include="sensors\tofc.h">
       <Filter>標頭檔\Add</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2006,11 +1949,11 @@
     <ClCompile Include="rx\xbus.c">
       <Filter>原始程式檔\Src</Filter>
     </ClCompile>
-    <ClCompile Include="drivers\tof_vl53l0x.c">
+    <ClCompile Include="drivers\tofc_vl53l0x.c">
       <Filter>原始程式檔\Add</Filter>
     </ClCompile>
-    <ClCompile Include="sensors\tof.c">
-      <Filter>原始程式檔\Src</Filter>
+    <ClCompile Include="sensors\tofc.c">
+      <Filter>原始程式檔\Add</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

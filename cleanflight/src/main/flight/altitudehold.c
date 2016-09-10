@@ -41,6 +41,7 @@
 #include "sensors/acceleration.h"
 #include "sensors/barometer.h"
 #include "sensors/sonar.h"
+#include "sensors/tofc.h"
 
 #include "rx/rx.h"
 
@@ -221,9 +222,14 @@ void calculateEstimatedAltitude(uint32_t currentTime)
     static int32_t lastBaroAlt;
 
 #ifdef SONAR
-    int32_t sonarAlt = SONAR_OUT_OF_RANGE;
-    static int32_t baroAlt_offset = 0;
-    float sonarTransition;
+	int32_t sonarAlt = SONAR_OUT_OF_RANGE;
+	static int32_t baroAlt_offset = 0;
+	float sonarTransition;
+#endif
+#ifdef TOFC
+	int32_t tofcAlt = -1;
+	static int32_t baroAlt_tofc_offset = 0;
+	//float tofcTransition;
 #endif
 
     dTime = currentTime - previousTime;
@@ -248,7 +254,7 @@ void calculateEstimatedAltitude(uint32_t currentTime)
     sonarAlt = sonarRead();
     sonarAlt = sonarCalculateAltitude(sonarAlt, getCosTiltAngle());
 
-	//TODO #20160908%phis109 分離BARO SONAR tof的定高計算  並排列優先條件
+	//TODO #20160908%phis109 分離BARO SONAR TOF的定高計算  並排列優先條件
     if (sonarAlt > 0 && sonarAlt < sonarCfAltCm) {
         // just use the SONAR
         baroAlt_offset = BaroAlt - sonarAlt;
@@ -263,8 +269,10 @@ void calculateEstimatedAltitude(uint32_t currentTime)
     }
 #endif
 
-#ifdef TOF
-
+#ifdef TOFC
+	//TODO #20160910%phis110 TOFC在SONAR之後的處理. 注意優先權以及BARO差值補正
+	tofcAlt = tofc[4].data.range;
+	baroAlt_tofc_offset = 0;
 #endif
 
     dt = accTimeSum * 1e-6f; // delta acc reading time in seconds

@@ -40,7 +40,7 @@
 #include "sensors/sensors.h"
 #include "sensors/gyro.h"
 #include "sensors/acceleration.h"
-#include "sensors/tof.h"
+#include "sensors/tofc.h"
 
 #include "rx/rx.h"
 
@@ -182,11 +182,11 @@ void pidMultiWiiRewrite(const pidProfile_t *pidProfile, const controlRateConfig_
 				//TODO #20160830%phis101 : (,否則會造成下輪迴圈時tof避障與GPS定點互相競爭控制載具)
 				//TODO #20160830%phis101 : (注意PID有3處除了pidMultiWiiRewrite,luxfloat之外沒有註記)
 #endif
-#ifdef TOF		
+#ifdef TOFC		
 				
-				if (FLIGHT_MODE(ANGLE_MODE) && tof_debug_avoidanceMode){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
+				if (FLIGHT_MODE(ANGLE_MODE) && tofc_debug_avoidanceMode){ // && FLIGHT_MODE(AVOIDANCE_MODE)) {
 					// ANGLE mode
-					errorAngleTemp += tof_angle[axis];
+					errorAngleTemp += TOFC_angle[axis];
 				}
 #endif
 				//#20160813 phis: 將errorAngle拆開計算 供tof避障加入運算

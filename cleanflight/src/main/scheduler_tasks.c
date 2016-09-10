@@ -138,7 +138,7 @@ cfTask_t cfTasks[TASK_COUNT] = {
     },
 #endif
 
-#ifdef TOF
+#ifdef TOFC
 	[TASK_tof] = {
 	.taskName = "tof",
 	.taskFunc = taskUpdatetof,

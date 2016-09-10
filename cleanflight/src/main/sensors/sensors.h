@@ -78,7 +78,7 @@ typedef struct   {
     uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
     uint8_t mag_hardware;                   // Which mag hardware to use on boards with more than one device
 	uint8_t baro_hardware;                  // Barometer hardware to use
-	uint8_t tof_hardware;                   // LaserRangeFinder  hardware to use
+	uint8_t TOFC_hardware;                   // LaserRangeFinder  hardware to use
 } sensorSelectionConfig_t;
 
 typedef struct sensorTrims_s {
