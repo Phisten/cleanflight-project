@@ -5,14 +5,16 @@
 
 
 #define TOFC_DEVICE_COUNT 5
-#define TOFC_DEVICE_START_ADDR 0x30
+#define TOFC_DEVICE_START_ADDR (0x52 >> 1) + 1
+#define TOFC_INVALID_RANGE 20
 
-//tof = Laser Range Finder
+
+//tofc = time of flight camera
 
 typedef enum {
 	TOFC_DEFAULT = 0,
 	TOFC_NONE = 1,
-	tofc_vl53l0x = 2,
+	TOFC_VL53l0X = 2,
 	TOFC_FAKE
 } tofcSensor_e;
 
@@ -31,21 +33,19 @@ typedef enum {
 	//TOFC_ALIGN_Z_CW180_DEG = 3,
 	//TOFC_ALIGN_Z_CW270_DEG = 4,
 	//TOFC_ALIGN_Z_CW0_DEG_X_CW90_DEG = 5
-} TOFC_align_e;
+} tofc_align_e;
 
 
 
-typedef struct tofDevice_s {
+typedef struct tofcDevice_s {
 	GPIO_TypeDef* i2cXsdnGpioType; //﹍てㄏノXsdn pin type
 	gpio_config_t i2cXsdnGpioCfg; //﹍てㄏノXsdn pin Config
 	uint8_t i2cAddr;
 	//tofcOpFuncPtr init; //砞﹚禯瞒秖代家Α
-} tofDevice_t;
-typedef struct tofData_s {
+} tofcDevice_t;
+typedef struct tofcData_s {
 	uint16_t range;
 
-	uint16_t valid_range_min;
-	uint16_t valid_range_max;
 	// -------- VL53L0X --------
 	uint8_t rangeStatus;
 	uint8_t deviceError;
@@ -54,20 +54,25 @@ typedef struct tofData_s {
 	uint16_t effectiveSpadRtnCount;
 	// -------------------------
 } tofcData_t;
-typedef struct tofConfig_s {
-	uint32_t validRangeWaitLimit;
+typedef struct tofcConfig_s {
+	uint32_t validRangeKeepMs;
 
-
+	//TODO ㏑跑计ㄏㄤ办ぃ睼瞔
+	//计""礚禯瞒
+	uint16_t minValidRange;
+	//"禬筁"计礚禯瞒
+	uint16_t maxValidRange;
 } tofcConfig_t;
 
-typedef struct TOFC_s {
+typedef struct tofc_s {
 	//int tofDeviceCount;
 	bool enable; //琌币ノ
-	tofDevice_t device;
+	tofcDevice_t device;
 	tofcData_t data;
+	tofcConfig_t config;
 	
 	uint16_t lastValidRange;
-	uint32_t lastValidRangeDaltaTime;
+	uint32_t lastValidRangeTime;
 
 	
 	// ----- i2c -----
@@ -84,8 +89,11 @@ void tofcInit(void);
 void tofcUpdate(void);
 void updateTofcStateForAvoidanceMode(void);
 
-bool isAltitudeTofcEnable(void);
-int32_t tofcCalculateAltitude(void);
+bool tofcIsValidRange(tofc_t tofc1);
+
+//alt hold
+bool tofcIsAltitudeEnable(void);
+int32_t tofcGetAltitudeCm(float cosTiltAngle);
 
 //void resetDistanceTrims(distanceTrims_t *distanceTrims);
 //void updateLaserRangeFinderReadings(distanceTrims_t *distanceTrims);

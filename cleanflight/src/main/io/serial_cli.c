@@ -220,7 +220,7 @@ static const char * const sensorTypeNames[] = {
     "GYRO", "ACC", "BARO", "MAG", "SONAR", "GPS", "GPS+MAG", "tof", NULL
 };
 
-#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_tof)
+#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_TOFC)
 
 static const char * const sensorHardwareNames[8][11] = {
     { "", "None", "MPU6050", "L3G4200D", "MPU3050", "L3GD20", "MPU6000", "MPU6500", "FAKE", NULL },
@@ -739,7 +739,7 @@ const clivalue_t valueTable[] = {
 //	{ "tofc_tab_size",				VAR_UINT8  | PROFILE_VALUE, .config.minmax = { 0,  BARO_SAMPLE_COUNT_MAX }, PG_BAROMETER_CONFIG, offsetof(barometerConfig_t, baro_sample_count)},
 	//{ "TOFC_range",					VAR_UINT16 | PROFILE_VALUE, .config.minmax = { 0 , 65535 } , PG_TOFC_CONFIG, offsetof(tofc_t, baro_noise_lpf) },
 
-	//{ "TOFC_hardware",               VAR_UINT8  | MASTER_VALUE,.config.minmax = { 0,  BARO_MAX } , PG_SENSOR_SELECTION_CONFIG, offsetof(sensorSelectionConfig_t, baro_hardware) },
+	//{ "tofc_hardware",               VAR_UINT8  | MASTER_VALUE,.config.minmax = { 0,  BARO_MAX } , PG_SENSOR_SELECTION_CONFIG, offsetof(sensorSelectionConfig_t, baro_hardware) },
 
 #endif
 
@@ -1128,7 +1128,17 @@ static void cliGetRangefinderData(char *cmdline) //#20160822 phis
 		for (int i = 0; i < TOFC_DEVICE_COUNT; i++)
 		{
 			cliPrintf("tof index:%d , enable=%d\r\n", i, tofc[i].enable);
-			cliPrintf("XSDN pin = %d , Addr = %d , Data = %d\r\n", tofc[i].device.i2cXsdnGpioCfg.pin, tofc[i].device.i2cAddr, tofc[i].data.range);
+			cliPrintf("XSDN pin = %d , Addr = %d , Data = %d", tofc[i].device.i2cXsdnGpioCfg.pin, tofc[i].device.i2cAddr, tofc[i].data.range);
+			if (tofc[i].enable)
+			{
+				uint8_t curTofcAddr = 0x29;
+				i2cRead(tofc[i].device.i2cAddr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, 1, &curTofcAddr);
+				cliPrintf(" | ReadAddr = %d\r\n", curTofcAddr);
+			}
+			else
+			{
+				cliPrintf("\r\n");
+			}
 		}
 	}
 	else
@@ -1147,8 +1157,6 @@ static void cliSetRangefinderData(char *cmdline) //#20160822 phis
 {
 	if (isEmpty(cmdline)) {
 		cliPrintf("input: reg and value\r\n");
-
-
 	}
 	else
 	{
@@ -2130,7 +2138,7 @@ void cliEnter(serialPort_t *serialPort)
                               (bufWrite_t)serialWriteBufShim, serialPort);
 
 	cliPrint("\r\nEntering CLI Mode, type 'exit' to return, or 'help'\r\n");
-	cliPrint("\r\nHello World 20160820 phis\r\n");
+	cliPrint("\r\n#20160913 phis: tofc array and althold test\r\n");
     cliPrompt();
     ENABLE_ARMING_FLAG(PREVENT_ARMING);
 }

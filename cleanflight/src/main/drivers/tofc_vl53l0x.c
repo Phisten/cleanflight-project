@@ -37,6 +37,7 @@ char* VL53L0X_DeviceErrorString[] = {
 };
 int VL53L0X_DeviceErrorCount = 15;
 
+//disable
 void tofc_vl53l0x_Init(int tofIndex)
 {
 	UNUSED(tofIndex);
@@ -87,25 +88,28 @@ bool tofc_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg , uint8
 	gpioInit(gpioType, &gpioCfg);
 	uint16_t xsdnPin = gpioCfg.pin;
 
+	delay(10);
 	digitalLo(gpioType, xsdnPin);
 	delay(10);
 	digitalHi(gpioType, xsdnPin);
 	delay(10);
 
 	uint8_t in_addr = VL53L0X_DEVICE_DEAFULT_ADDR; //default
+	uint8_t SLAVE_DEVICE_ADDRESS = 0xFF;
+	//設定新Addr
 	if (i2cWrite(in_addr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, i2cAddr))
 	{
-		//uint8_t SLAVE_DEVICE_ADDRESS;
-		//i2cRead(i2cAddr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, 1, &SLAVE_DEVICE_ADDRESS);
-
-		//if (SLAVE_DEVICE_ADDRESS == i2cAddr)
-		//{
-			// enable VL53L0X  backtoback  range mode
-			i2cWrite(i2cAddr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK | VL53L0X_REG_SYSRANGE_MODE_START_STOP);
-			return true;
-		//}
+		delay(10);
+		//要求返回Addr
+		if (i2cRead(i2cAddr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, 1, &SLAVE_DEVICE_ADDRESS))
+			//確認Addr是否成功設置
+			if (SLAVE_DEVICE_ADDRESS == i2cAddr) 
+			{
+				//啟動連續測距
+				delay(10);
+				return i2cWrite(i2cAddr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK | VL53L0X_REG_SYSRANGE_MODE_START_STOP);
+			}
 	}
-
 	return false;
 }
 

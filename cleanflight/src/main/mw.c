@@ -711,7 +711,7 @@ void taskMainPidLoop(void)
 	}
 #endif
 #ifdef TOFC
-	if (sensors(SENSOR_tof)) {
+	if (sensors(SENSOR_TOFC)) {
 		//TODO #20160831%phis104 新增AVOIDANCE_MODE在configurator
 		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE)) ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
 			updateTofcStateForAvoidanceMode();
@@ -897,7 +897,7 @@ void taskCalculateAltitude(void)
 		|| sensors(SENSOR_SONAR)
 #endif
 #if defined(tof)
-		|| (sensors(SENSOR_tof) && isAltitudeTofcEnable())
+		|| (sensors(SENSOR_TOFC) && isAltitudeTofcEnable())
 //TODO #20160908%phis108 定高模式使用tof高度計前 確認定高tof是否可用的判斷式 istofAltitudeEnable()
 #endif
         ) {
@@ -908,7 +908,7 @@ void taskCalculateAltitude(void)
 #ifdef TOFC
 void taskUpdatetof(void)
 {
-	if (sensors(SENSOR_tof)) {
+	if (sensors(SENSOR_TOFC)) {
 		tofcUpdate();
 	}
 }

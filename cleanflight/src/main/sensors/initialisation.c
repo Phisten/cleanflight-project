@@ -742,7 +742,7 @@ bool sensorsAutodetect(void)
 #endif
 
 #ifdef TOFC
-//	detecttof(sensorSelectionConfig()->TOFC_hardware);
+//	detecttof(sensorSelectionConfig()->tofc_hardware);
 #endif
 
     reconfigureAlignment(sensorAlignmentConfig());

@@ -711,7 +711,7 @@ int main(void) {
 	setTaskEnabled(TASK_BARO, sensors(SENSOR_BARO));
 #endif
 #ifdef TOFC
-	setTaskEnabled(TASK_tof, sensors(SENSOR_tof));
+	setTaskEnabled(TASK_tof, sensors(SENSOR_TOFC));
 #endif
 #ifdef SONAR
     setTaskEnabled(TASK_SONAR, sensors(SENSOR_SONAR));

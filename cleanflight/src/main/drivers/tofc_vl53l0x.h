@@ -924,15 +924,16 @@ FINAL_RANGE	(4) Final Range Check
 // 自定義參數 -----------------------------------------------------------------------
 
 //有效20~1200//長距離20~2000  20~8190mm   
-#define VL53L0X_MIN_OF_RANGE (20)
-#define VL53L0X_STANDARD_RANGE (1200)
 #define VL53L0X_LONG_RANGE (2000)
-#define VL53L0X_OUT_OF_RANGE (8190)
+#define VL53L0X_STANDARD_RANGE (1200)
+
+#define VL53L0X_MIN_OF_RANGE (20)
+#define VL53L0X_OUT_OF_RANGE (3000)
 
 #define VL53L0X_DEVICE_DEAFULT_ADDR (0x52 >> 1)
 
 extern char* VL53L0X_DeviceErrorString[];
 extern int VL53L0X_DeviceErrorCount;
 
-void tofc_vl53l0x_Init(int tofIndex);
+//void tofc_vl53l0x_Init(int tofIndex);
 bool tofc_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg, uint8_t i2cAddr);

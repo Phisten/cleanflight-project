@@ -227,7 +227,7 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 	float sonarTransition;
 #endif
 #ifdef TOFC
-	int32_t tofcAlt = -1;
+	int32_t tofcAltCm = -1;
 	static int32_t baroAlt_tofc_offset = 0;
 	//float tofcTransition;
 #endif
@@ -270,9 +270,24 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 #endif
 
 #ifdef TOFC
-	//TODO #20160910%phis110 TOFCSONARぇ矪瞶. 猔種纔舦のBARO畉干タ
-	tofcAlt = tofc[4].data.range;
-	baroAlt_tofc_offset = 0;
+	if (tofcIsAltitudeEnable())
+	{
+		//TODO #20160910%phis110 TOFCSONARぇ矪瞶. 猔種纔舦のBARO畉干タ
+		tofcAltCm = tofcGetAltitudeCm(getCosTiltAngle());
+
+		//讽浪代挡狦獺
+		if (tofcIsValidRange(tofc[TOFC_ALIGN_BOTTOM]))
+		{
+			//TODO #20160912%phis111 TOFC籔SONAR秨币,籔baro畉干纕穦岿
+			baroAlt_tofc_offset = BaroAlt - tofcAltCm;
+			BaroAlt = tofcAltCm;
+		}
+		else {
+			BaroAlt -= baroAlt_tofc_offset;
+			//ゼㄏノが干耾猧,獺TOFC代禯挡狦
+		}
+		debug[7] = BaroAlt;
+	}
 #endif
 
     dt = accTimeSum * 1e-6f; // delta acc reading time in seconds
@@ -304,15 +319,22 @@ void calculateEstimatedAltitude(uint32_t currentTime)
     }
 #endif
 
+	// if only baro
+	EstAlt = accAlt;
 #ifdef SONAR
-    if (sonarAlt > 0 && sonarAlt < sonarCfAltCm) {
-        // the sonar has the best range
-        EstAlt = BaroAlt;
-    } else {
-        EstAlt = accAlt;
-    }
-#else
-    EstAlt = accAlt;
+	if (sonarAlt > 0 && sonarAlt < sonarCfAltCm) {
+		// the sonar has the best range
+		EstAlt = BaroAlt;
+	}
+#endif
+#ifdef TOFC
+	if (tofcIsAltitudeEnable())
+	{
+		if (tofcIsValidRange(tofc[TOFC_ALIGN_BOTTOM])) {
+			// the tofc has the best range
+			EstAlt = BaroAlt;
+		}
+	}
 #endif
 
     baroVel = (BaroAlt - lastBaroAlt) * 1000000.0f / dTime;
