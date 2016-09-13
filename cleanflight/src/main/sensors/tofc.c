@@ -9,7 +9,7 @@
 
 #include "debug.h"
 
-//#include "common/maths.h"
+#include "common/maths.h"
 #include "common/axis.h"
 
 #include "config/parameter_group.h"
@@ -25,19 +25,17 @@
 
 //#include "io/rc_controls.h"
 #include "sensors/sensors.h"
-
-
-
 #include "sensors/tofc.h"
 
 #ifdef TOFC
 
+#define DEBUG_TOF
 //#define VL53L0X
 
 //close #20160906%phis106 未來改為5個感測器
 tofc_t tofc[TOFC_DEVICE_COUNT];
-uint16_t tofXsdnGpio[TOFC_DEVICE_COUNT]			= { GPIO_Pin_0	,GPIO_Pin_1	,GPIO_Pin_4	,GPIO_Pin_5 };
-GPIO_TypeDef* tofXsdnGpioType[TOFC_DEVICE_COUNT] = { GPIOA		,GPIOA		,GPIOB		,GPIOB };
+uint16_t tofXsdnGpio[TOFC_DEVICE_COUNT]			= { GPIO_Pin_0	,GPIO_Pin_1	,GPIO_Pin_4	,GPIO_Pin_5	,GPIO_Pin_1 }; // IO1 LEDS = GPIO_Pin_8 GPIOB
+GPIO_TypeDef* tofXsdnGpioType[TOFC_DEVICE_COUNT] = { GPIOA		,GPIOA		,GPIOB		,GPIOB		,GPIOB };
 
 uint32_t tofCurrentTimeMs = 0;
 
@@ -77,31 +75,46 @@ void tofcInit(void)
 		//}
 		gpioCfg.speed = 1;
 
-		tofDevice_t curtofDevice;
+		tofcDevice_t curtofDevice;
 		curtofDevice.i2cXsdnGpioCfg = gpioCfg;
 		curtofDevice.i2cXsdnGpioType = tofXsdnGpioType[i];
 		curtofDevice.i2cAddr = TOFC_DEVICE_START_ADDR + i;
 
-		tofcData_t curtofData;
+		tofcData_t curtofData = {0};
+
+		tofcConfig_t curtofcCfg = {
+			.validRangeKeepMs = 200,
+			.minValidRange = VL53L0X_MIN_OF_RANGE,
+			.maxValidRange = VL53L0X_OUT_OF_RANGE
+		};
+
 		tofc_t curtof = {
+			.enable = false,
 			.device = curtofDevice,
 			.data = curtofData,
-			.enable = true
+			.config = curtofcCfg,
+
+			.lastValidRange = 0,
+			.lastValidRangeTime = 0
 		};
-		//curtof.device = curtofDevice;
-		//curtof.data = curtofData;
-		//curtof.enable = true;
+		//curtof.lastValidRangeTime = millis();
 		tofc[i] = curtof;
 	}
 
-	//tof裝置初始化
+	//tofc XSDN init
+	//for (int i = 0; i < TOFC_DEVICE_COUNT; i++)
+	//{
+	//	tofcDevice_t curtofDevice = tofc[i].device;
+	//	gpioInit(curtofDevice.i2cXsdnGpioType, &(curtofDevice.i2cXsdnGpioCfg));
+	//}
+	//delay(300);
+	//tofc裝置初始化
 	for (int i = 0; i < TOFC_DEVICE_COUNT; i++)
 	{
-		tofDevice_t curtofDevice = tofc[i].device;
-		//tofc_vl53l0x_Init(i);
+		tofcDevice_t curtofDevice = tofc[i].device;
 		tofc[i].enable = tofc_vl53l0x_i2c_init(curtofDevice.i2cXsdnGpioType, curtofDevice.i2cXsdnGpioCfg, curtofDevice.i2cAddr);
 	}
-	sensorsSet(SENSOR_tof);
+	sensorsSet(SENSOR_TOFC);
 }
 
 //update TOFC_angle for AvoidanceMode
@@ -173,9 +186,11 @@ void tofcUpdate(void)
 			continue;
 		}
 
-		uint8_t in_addr = 0x30;//0x29 0x2C
+		uint8_t in_addr = 0x29;//0x29 0x2C
 		in_addr = tofc[i].device.i2cAddr;
 		uint8_t VL53L0X_REG_buf[12];
+		uint32_t curMs = millis();
+
 		for (int i = 0; i < 12; i++)
 			VL53L0X_REG_buf[i] = 0;
 		i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
@@ -188,6 +203,11 @@ void tofcUpdate(void)
 		tofc[i].data.ambientRate = makeuint16____(VL53L0X_REG_buf[9], VL53L0X_REG_buf[8]);
 		tofc[i].data.effectiveSpadRtnCount = makeuint16____(VL53L0X_REG_buf[3], VL53L0X_REG_buf[2]);
 
+		if (tofc[i].data.deviceError == VL53L0X_DEVICEERROR_RANGECOMPLETE || (tofc[i].lastValidRangeTime - curMs) > tofc[i].config.validRangeKeepMs)
+		{
+			tofc[i].lastValidRange = dist;
+			tofc[i].lastValidRangeTime = curMs;
+		}
 
 #ifdef DEBUG_TOF
 		if (dist <= VL53L0X_MIN_OF_RANGE)
@@ -205,14 +225,41 @@ void tofcUpdate(void)
 		}
 		//debug[3 + i] = tofc[i].data.deviceError;
 #endif
-
-
 		//i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 	}
-	
-
 }
 
+bool tofcIsValidRange(tofc_t tofc1)
+{
+	uint16_t tmp = tofc1.lastValidRange;
+	return tmp > tofc1.config.minValidRange && tmp <= tofc1.config.maxValidRange;
+}
+
+//ALT HOLD
+bool tofcIsAltitudeEnable(void)
+{
+	return (TOFC_DEVICE_COUNT > TOFC_ALIGN_BOTTOM && tofc[TOFC_ALIGN_BOTTOM].enable == true);
+}
+
+//cosTiltAngle = getCosTiltAngle()
+int32_t tofcGetAltitudeCm(float cosTiltAngle)
+{
+	uint32_t calculatedAltitude = 0;
+	if (tofcIsAltitudeEnable())
+	{
+		tofc_t altTofc = tofc[TOFC_ALIGN_BOTTOM];
+		uint16_t tofcAltMm = altTofc.lastValidRange;
+
+		// calculate tofc altitude only if the ground is in the tofc cone
+		uint16_t tiltCos = cos_approx(225U / 10.0f * RAD);
+		if (cosTiltAngle <= tiltCos)
+			calculatedAltitude = altTofc.config.minValidRange;
+		else
+			// altitude = distance * cos(tiltAngle), use approximation
+			calculatedAltitude = tofcAltMm * cosTiltAngle;
+	}
+	return calculatedAltitude / 10;
+}
 
 #endif
 
