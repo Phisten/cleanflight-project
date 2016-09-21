@@ -619,8 +619,8 @@ void init(void)
     baroSetCalibrationCycles(CALIBRATING_BARO_CYCLES);
 #endif
 
-#ifdef TOFC //Laser Range Finder
-	if (feature(FEATURE_tof)) {
+#ifdef TOFC //Time of flight camera
+	if (feature(FEATURE_TOFC)) {
 		tofcInit();
 	}
 #endif
@@ -711,7 +711,7 @@ int main(void) {
 	setTaskEnabled(TASK_BARO, sensors(SENSOR_BARO));
 #endif
 #ifdef TOFC
-	setTaskEnabled(TASK_tof, sensors(SENSOR_TOFC));
+	setTaskEnabled(TASK_TOFC, sensors(SENSOR_TOFC));
 #endif
 #ifdef SONAR
     setTaskEnabled(TASK_SONAR, sensors(SENSOR_SONAR));

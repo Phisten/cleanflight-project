@@ -227,8 +227,12 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 	float sonarTransition;
 #endif
 #ifdef TOFC
+	tofc_t tofcAltSensor;
 	int32_t tofcAltCm = -1;
+	int32_t tofcAltMm = -1;
 	static int32_t baroAlt_tofc_offset = 0;
+	bool curTofcAltEnable = false;
+	bool curTofcIsValidRange = false;
 	//float tofcTransition;
 #endif
 
@@ -270,13 +274,18 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 #endif
 
 #ifdef TOFC
-	if (tofcIsAltitudeEnable())
+	//check tofcAltSensor valid
+	curTofcAltEnable = tofcGetAltitudeSensor(&tofcAltSensor);
+	if (curTofcAltEnable)
 	{
 		//TODO #20160910%phis110 TOFC在SONAR之後的處理. 注意優先權以及BARO差值補正
-		tofcAltCm = tofcGetAltitudeCm(getCosTiltAngle());
+		tofcAltMm = tofcGetAltitudeMm(getCosTiltAngle());
+		tofcAltCm = tofcAltMm / 10;
+
+		curTofcIsValidRange = tofcIsValidRange(tofcAltSensor);
 
 		//當檢測結果可信時
-		if (tofcIsValidRange(tofc[TOFC_ALIGN_BOTTOM]))
+		if (curTofcIsValidRange)
 		{
 			//TODO #20160912%phis111 TOFC與SONAR同時開啟時,與baro的差值補償會出錯
 			baroAlt_tofc_offset = BaroAlt - tofcAltCm;
@@ -286,7 +295,9 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 			BaroAlt -= baroAlt_tofc_offset;
 			//未使用互補濾波,一律相信TOFC測距結果
 		}
-		debug[7] = BaroAlt;
+		//測試雷射高度輸出
+		//debug[7] = BaroAlt;
+		//debug[8] = baroAlt_tofc_offset;
 	}
 #endif
 
@@ -328,9 +339,9 @@ void calculateEstimatedAltitude(uint32_t currentTime)
 	}
 #endif
 #ifdef TOFC
-	if (tofcIsAltitudeEnable())
+	if (curTofcAltEnable)
 	{
-		if (tofcIsValidRange(tofc[TOFC_ALIGN_BOTTOM])) {
+		if (curTofcIsValidRange) {
 			// the tofc has the best range
 			EstAlt = BaroAlt;
 		}

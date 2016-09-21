@@ -59,9 +59,9 @@ typedef struct tofcConfig_s {
 
 	//TODO ㏑跑计ㄏㄤ办ぃ睼瞔
 	//计""礚禯瞒
-	uint16_t minValidRange;
+	uint16_t inValidRangeBoundaryLow;
 	//"禬筁"计礚禯瞒
-	uint16_t maxValidRange;
+	uint16_t inValidRangeBoundaryHigh;
 } tofcConfig_t;
 
 typedef struct tofc_s {
@@ -93,7 +93,8 @@ bool tofcIsValidRange(tofc_t tofc1);
 
 //alt hold
 bool tofcIsAltitudeEnable(void);
-int32_t tofcGetAltitudeCm(float cosTiltAngle);
+bool tofcGetAltitudeSensor(tofc_t* altTofc);
+int32_t tofcGetAltitudeMm(float cosTiltAngle);
 
 //void resetDistanceTrims(distanceTrims_t *distanceTrims);
 //void updateLaserRangeFinderReadings(distanceTrims_t *distanceTrims);

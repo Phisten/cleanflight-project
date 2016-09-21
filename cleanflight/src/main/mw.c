@@ -645,8 +645,8 @@ void taskMainPidLoop(void)
     // Calculate average cycle time and average jitter
     filteredCycleTime = filterApplyPt1(cycleTime, &filteredCycleTimeState, 1, dT);
 
-    debug[0] = cycleTime;
-    debug[1] = cycleTime - filteredCycleTime;
+    //debug[0] = cycleTime;
+    //debug[1] = cycleTime - filteredCycleTime;
 
     imuUpdateGyroAndAttitude();
 
@@ -675,6 +675,7 @@ void taskMainPidLoop(void)
         updateGtuneState();
 #endif
 
+		//TODO #20160920%phis112 單獨使用TOFC的定高
 #if defined(BARO) || defined(SONAR)
         if (sensors(SENSOR_BARO) || sensors(SENSOR_SONAR)) {
             if (FLIGHT_MODE(BARO_MODE) || FLIGHT_MODE(SONAR_MODE)) {

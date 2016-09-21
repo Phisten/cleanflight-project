@@ -935,5 +935,4 @@ FINAL_RANGE	(4) Final Range Check
 extern char* VL53L0X_DeviceErrorString[];
 extern int VL53L0X_DeviceErrorCount;
 
-//void tofc_vl53l0x_Init(int tofIndex);
 bool tofc_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg, uint8_t i2cAddr);

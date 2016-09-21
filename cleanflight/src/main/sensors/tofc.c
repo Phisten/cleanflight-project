@@ -69,10 +69,6 @@ void tofcInit(void)
 		gpio_config_t gpioCfg;
 		gpioCfg.mode = GPIO_Mode_OUT;
 		gpioCfg.pin = tofXsdnGpio[i];
-		//if (i==1)
-		//{
-		//	gpioCfg.pin = GPIO_Pin_2;
-		//}
 		gpioCfg.speed = 1;
 
 		tofcDevice_t curtofDevice;
@@ -84,8 +80,8 @@ void tofcInit(void)
 
 		tofcConfig_t curtofcCfg = {
 			.validRangeKeepMs = 200,
-			.minValidRange = VL53L0X_MIN_OF_RANGE,
-			.maxValidRange = VL53L0X_OUT_OF_RANGE
+			.inValidRangeBoundaryLow = VL53L0X_MIN_OF_RANGE,
+			.inValidRangeBoundaryHigh = VL53L0X_OUT_OF_RANGE
 		};
 
 		tofc_t curtof = {
@@ -137,7 +133,7 @@ void updateTofcStateForAvoidanceMode(void)
 	{
 		if (tofc[i].enable == true)
 		{
-			uint16_t dist = tofc[i].data.range; // mm
+			uint16_t dist = tofc[i].lastValidRange; // mm
 			float avoidP = 0;
 			uint16_t avoidAngle = 0;
 			if (dist < startAvoidThres && dist > endAvoidThres)
@@ -165,7 +161,7 @@ void updateTofcStateForAvoidanceMode(void)
 
 				}
 				//close #20160831%phis104 注意此處0與-1需根據tof安裝位置改變
-				//TODO #20160906%phis107 注意第5個tof用於高度感測,不處理姿態
+				//close #20160906%phis107 注意第5個tof用於高度感測,不處理姿態
 				TOFC_angle[AI_ROLL] += tofAngleAlign[i][AI_ROLL] * avoidAngle;  // 1/10 degree
 				TOFC_angle[AI_PITCH] += tofAngleAlign[i][AI_PITCH] * avoidAngle;  // 1/10 degree
 			}
@@ -203,25 +199,32 @@ void tofcUpdate(void)
 		tofc[i].data.ambientRate = makeuint16____(VL53L0X_REG_buf[9], VL53L0X_REG_buf[8]);
 		tofc[i].data.effectiveSpadRtnCount = makeuint16____(VL53L0X_REG_buf[3], VL53L0X_REG_buf[2]);
 
-		if (tofc[i].data.deviceError == VL53L0X_DEVICEERROR_RANGECOMPLETE || (tofc[i].lastValidRangeTime - curMs) > tofc[i].config.validRangeKeepMs)
+
+		if (tofc[i].data.deviceError == VL53L0X_DEVICEERROR_RANGECOMPLETE)
 		{
 			tofc[i].lastValidRange = dist;
 			tofc[i].lastValidRangeTime = curMs;
 		}
+		else if ((tofc[i].lastValidRangeTime - curMs) > tofc[i].config.validRangeKeepMs)
+		{
+			tofc[i].lastValidRange = VL53L0X_OUT_OF_RANGE;
+			tofc[i].lastValidRangeTime = curMs;
+		}
 
 #ifdef DEBUG_TOF
-		if (dist <= VL53L0X_MIN_OF_RANGE)
+		uint16_t debugOutDist = tofc[i].lastValidRange;
+		if (debugOutDist <= VL53L0X_MIN_OF_RANGE)
 		{
-			debug[2 + i] = dist;
+			debug[2 + i] = debugOutDist;
 		}
-		else if(dist > 3000)
+		else if(debugOutDist > VL53L0X_OUT_OF_RANGE)
 		{
 			//TODO #20160830%phis102 : 將debug輸出改為tof專用輸出(5通道)
-			debug[2 + i] = 3000;
+			debug[2 + i] = VL53L0X_OUT_OF_RANGE;
 		}
 		else
 		{
-			debug[2 + i] = dist;
+			debug[2 + i] = debugOutDist;
 		}
 		//debug[3 + i] = tofc[i].data.deviceError;
 #endif
@@ -232,17 +235,31 @@ void tofcUpdate(void)
 bool tofcIsValidRange(tofc_t tofc1)
 {
 	uint16_t tmp = tofc1.lastValidRange;
-	return tmp > tofc1.config.minValidRange && tmp <= tofc1.config.maxValidRange;
+	return tmp > tofc1.config.inValidRangeBoundaryLow && tmp < tofc1.config.inValidRangeBoundaryHigh;
 }
 
-//ALT HOLD
+
+
+//ALT HOLD --------------------------------------------------------------------------------------------
+
+
 bool tofcIsAltitudeEnable(void)
 {
 	return (TOFC_DEVICE_COUNT > TOFC_ALIGN_BOTTOM && tofc[TOFC_ALIGN_BOTTOM].enable == true);
 }
+bool tofcGetAltitudeSensor(tofc_t* getAltTofcPtr)
+{
+	bool IsAltitudeEnable = tofcIsAltitudeEnable();
+	if (IsAltitudeEnable)
+	{
+		*getAltTofcPtr = tofc[TOFC_ALIGN_BOTTOM];
+	}
+	return IsAltitudeEnable;
+}
 
 //cosTiltAngle = getCosTiltAngle()
-int32_t tofcGetAltitudeCm(float cosTiltAngle)
+
+int32_t tofcGetAltitudeMm(float cosTiltAngle)
 {
 	uint32_t calculatedAltitude = 0;
 	if (tofcIsAltitudeEnable())
@@ -253,12 +270,12 @@ int32_t tofcGetAltitudeCm(float cosTiltAngle)
 		// calculate tofc altitude only if the ground is in the tofc cone
 		uint16_t tiltCos = cos_approx(225U / 10.0f * RAD);
 		if (cosTiltAngle <= tiltCos)
-			calculatedAltitude = altTofc.config.minValidRange;
+			calculatedAltitude = altTofc.config.inValidRangeBoundaryLow;
 		else
 			// altitude = distance * cos(tiltAngle), use approximation
 			calculatedAltitude = tofcAltMm * cosTiltAngle;
 	}
-	return calculatedAltitude / 10;
+	return calculatedAltitude;
 }
 
 #endif

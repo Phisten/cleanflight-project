@@ -139,8 +139,8 @@ cfTask_t cfTasks[TASK_COUNT] = {
 #endif
 
 #ifdef TOFC
-	[TASK_tof] = {
-	.taskName = "tof",
+	[TASK_TOFC] = {
+	.taskName = "TOFC",
 	.taskFunc = taskUpdatetof,
 	.desiredPeriod = 1000000 / 33,         // 33 Hz, every 30.3 ms
 	.staticPriority = TASK_PRIORITY_MEDIUM,

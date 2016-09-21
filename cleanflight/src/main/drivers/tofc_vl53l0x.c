@@ -37,52 +37,6 @@ char* VL53L0X_DeviceErrorString[] = {
 };
 int VL53L0X_DeviceErrorCount = 15;
 
-//disable
-void tofc_vl53l0x_Init(int tofIndex)
-{
-	UNUSED(tofIndex);
-	//TODO 初始化參數應封裝至tof結構
-	//int i = tofIndex;
-
-	gpio_config_t gpioCfg;
-	gpioCfg.mode = GPIO_Mode_OUT;
-	gpioCfg.pin = GPIO_Pin_1; //PA1
-	gpioInit(GPIOA, &gpioCfg);
-
-	digitalLo(GPIOA, gpioCfg.pin);
-	delay(100);
-	digitalHi(GPIOA, gpioCfg.pin);
-	delay(100);
-
-	uint8_t in_addr = 0x29; //default
-	i2cWrite(in_addr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, 0x30);
-
-	//TODO 未解決執行階段錯誤
-	//TOFC_DEVICE_DEAFULT_ADDR + i + 1
-	//tof.Enable[i] = true;
-	//tof.device[i]->I2cDevAddr = TOFC_DEVICE_DEAFULT_ADDR + i + 1;
-	//tof.device[i]->comms_type = VL53L0X_COMMS_I2C;	/*!< Type of comms : VL53L0X_COMMS_I2C or VL53L0X_COMMS_SPI */
-	//tof.device[i]->comms_speed_khz = 400;           /*!< Comms speed [kHz] : typically 400kHz for I2C           */
-	//tof.i2cXsdnGpioType[i] = GPIOA;
-	//tof.i2cXsdnGpioCfg[i].pin = GPIO_Pin_1 + i;
-	//tof.i2cXsdnGpioCfg[i].mode = GPIO_Mode_OUT;
-
-
-	//GPIO_TypeDef* gpioType = tof.i2cXsdnGpioType[i];
-	//gpio_config_t* gpioCfg = &tof.i2cXsdnGpioCfg[i];
-	//gpioInit(gpioType, gpioCfg);
-	//digitalLo(gpioType, gpioCfg->pin);
-	//delay(100);
-	//digitalHi(gpioType, gpioCfg->pin);
-	//delay(100);
-
-	//uint8_t in_addr = tof.device[i]->I2cDevAddr; //default
-	//i2cWrite(in_addr, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, tof.device[i]->I2cDevAddr);
-	//delay(100);
-	//i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP ); // | VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK
-}
-
-
 bool tofc_vl53l0x_i2c_init(GPIO_TypeDef* gpioType, gpio_config_t gpioCfg , uint8_t i2cAddr)
 {
 	gpioInit(gpioType, &gpioCfg);
