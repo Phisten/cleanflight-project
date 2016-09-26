@@ -714,7 +714,7 @@ void taskMainPidLoop(void)
 #ifdef TOFC
 	if (sensors(SENSOR_TOFC)) {
 		//TODO #20160831%phis104 ·s¼WAVOIDANCE_MODE¦bconfigurator
-		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE)) ){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
+		if ((FLIGHT_MODE(HORIZON_MODE) || FLIGHT_MODE(ANGLE_MODE)) && tofc_debug_avoidanceMode){// && FLIGHT_MODE(AVOIDANCE_MODE)) {
 			updateTofcStateForAvoidanceMode();
 		}
 	}

@@ -85,6 +85,7 @@ typedef struct tofc_s {
 } tofc_t;
 
 extern int16_t TOFC_angle[ANGLE_INDEX_COUNT];
+extern int16_t TOFC_Throttle;
 extern tofc_t tofc[TOFC_DEVICE_COUNT];
 extern bool tofc_debug_avoidanceMode;
 
