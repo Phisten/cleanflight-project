@@ -6,7 +6,7 @@
 
 #define TOFC_DEVICE_COUNT 5
 #define TOFC_DEVICE_START_ADDR (0x52 >> 1) + 1
-#define TOFC_INVALID_RANGE 20
+#define TOFC_ROWDATA_COUNT 5
 
 
 //tofc = time of flight camera
@@ -46,9 +46,9 @@ typedef struct tofcDevice_s {
 typedef struct tofcData_s {
 	uint16_t range;
 
-	// -------- VL53L0X --------
+	// -------- VL53L0X -------- 
 	uint8_t rangeStatus;
-	uint8_t deviceError;
+	uint8_t deviceError; //from rangeStatus
 	uint16_t ambientRate;
 	uint32_t signalRate;
 	uint16_t effectiveSpadRtnCount;
@@ -60,7 +60,7 @@ typedef struct tofcConfig_s {
 	//TODO ㏑跑计ㄏㄤ办ぃ睼瞔
 	//计""礚禯瞒
 	uint16_t inValidRangeBoundaryLow;
-	//"禬筁"计礚禯瞒
+	//计""礚禯瞒
 	uint16_t inValidRangeBoundaryHigh;
 } tofcConfig_t;
 
@@ -68,11 +68,14 @@ typedef struct tofc_s {
 	//int tofDeviceCount;
 	bool enable; //琌币ノ
 	tofcDevice_t device;
-	tofcData_t data;
 	tofcConfig_t config;
+	tofcData_t data;
+	tofcData_t rowData[TOFC_ROWDATA_COUNT];
+	int nextRowDataIndex;
 	
 	uint16_t lastValidRange;
 	uint32_t lastValidRangeTime;
+	bool lastValidRangeHealthy;
 
 	
 	// ----- i2c -----

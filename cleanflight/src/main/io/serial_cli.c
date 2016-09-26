@@ -1174,14 +1174,9 @@ static void cliSetRangefinderData(char *cmdline) //#20160822 phis
 	cliPrompt();
 }
 
-static void cliPrintRange(char *cmdline) //#20160822 phis
-{
-	//int len = 0;
-	//len = strlen(cmdline);
-	UNUSED(cmdline);
 
-	uint8_t in_addr = TOFC_DEVICE_START_ADDR;//0x29 0x2C
-	//Start Range
+static void vl53l0x_print(int in_addr)
+{
 	i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 
 	//ranging
@@ -1216,7 +1211,7 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 
 	SignalRate = (uint32_t)makeuint16(localBuffer[7], localBuffer[6]);
 	AmbientRate = makeuint16(localBuffer[9], localBuffer[8]);
-	EffectiveSpadRtnCount = makeuint16(localBuffer[3],localBuffer[2]);
+	EffectiveSpadRtnCount = makeuint16(localBuffer[3], localBuffer[2]);
 	DeviceRangeStatus = localBuffer[0];
 
 	//char* VL53L0X_DeviceErrorString[] = {
@@ -1247,6 +1242,39 @@ static void cliPrintRange(char *cmdline) //#20160822 phis
 	cliPrintf("[7,6]SignalRate = %d\r\n", SignalRate);
 	cliPrintf("[9,8]AmbientRate = %d\r\n", AmbientRate);
 	cliPrintf("[B,A]distance: %dmm\r\n", dist);
+}
+static void cliPrintRange(char *cmdline) //#20160822 phis
+{
+	//int len = 0;
+	//len = strlen(cmdline);
+	UNUSED(cmdline);
+
+
+	if (isEmpty(cmdline)) {
+		vl53l0x_print(TOFC_DEVICE_START_ADDR);
+	}
+	else
+	{
+		//int len = strlen(cmdline);
+		int tofcIndex = atoi(cmdline);
+		if (tofcIndex < TOFC_DEVICE_COUNT)
+		{
+			if (tofc[tofcIndex].enable)
+			{
+				vl53l0x_print(tofc[tofcIndex].device.i2cAddr);
+				cliPrintf("ValidRange Dalta Time: %dms\r\n", tofc[tofcIndex].lastValidRangeTime - millis());
+			}
+			else
+			{
+				cliPrintf("tofcIndex=%d enable=False\r\n", tofcIndex);
+			}
+		}
+		else
+		{
+			cliPrintf("tofcIndex=%d , TOFC_DEVICE_COUNT=%d\r\n", tofcIndex , TOFC_DEVICE_COUNT);
+		}
+	}
+	
 }
 
 //----------------------------------------------------------------------------------------------

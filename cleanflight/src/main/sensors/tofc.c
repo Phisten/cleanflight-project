@@ -57,8 +57,6 @@ uint16_t makeuint16____(uint16_t lsb, uint16_t msb)
 	return ((msb & 0xFF) << 8) | (lsb & 0xFF);
 }
 
-
-
 void tofcInit(void)
 {
 	
@@ -76,10 +74,16 @@ void tofcInit(void)
 		curtofDevice.i2cXsdnGpioType = tofXsdnGpioType[i];
 		curtofDevice.i2cAddr = TOFC_DEVICE_START_ADDR + i;
 
-		tofcData_t curtofData = {0};
+		tofcData_t curTocfData = {0};
+		//tofcData_t curRowData[] = { {0},{0},{0} };
+		//for (int j = 0; j < TOFC_ROWDATA_COUNT; j++)
+		//{
+		//	tofcData_t tmpTocfData = { 0 };
+		//	curRowData[j] = tmpTocfData;
+		//}
 
 		tofcConfig_t curtofcCfg = {
-			.validRangeKeepMs = 200,
+			.validRangeKeepMs = 500,
 			.inValidRangeBoundaryLow = VL53L0X_MIN_OF_RANGE,
 			.inValidRangeBoundaryHigh = VL53L0X_OUT_OF_RANGE
 		};
@@ -87,8 +91,10 @@ void tofcInit(void)
 		tofc_t curtof = {
 			.enable = false,
 			.device = curtofDevice,
-			.data = curtofData,
+			.data = curTocfData,
 			.config = curtofcCfg,
+			.rowData = { { 0 },{ 0 },{ 0 },{ 0 },{ 0 } },
+			.nextRowDataIndex = 0,
 
 			.lastValidRange = 0,
 			.lastValidRangeTime = 0
@@ -119,14 +125,16 @@ void updateTofcStateForAvoidanceMode(void)
 	TOFC_angle[AI_ROLL] = 0;
 	TOFC_angle[AI_PITCH] = 0;
 
-	uint16_t startAvoidThres = 2000;   // dist mm 大於此距離不迴避(VL53L0X標準檢測距離1.2m 長距離2m)
+
+	//TODO #20160921%phis113 若演算法已決定,需將參數設定移至GUI
+	uint16_t startAvoidThres = 1200;   // dist mm 大於等於此距離不迴避(VL53L0X標準檢測距離1.2m 長距離2m)
 	uint16_t startAvoidAngle = 40;    // 1/10 degree 起始迴避區段的最大傾角
-	uint16_t midAvoidAngleThres = 1000;   // dist mm 距離多近時迴避角度達到minAvoidAngle
+	uint16_t midAvoidAngleThres = 900;   // dist mm 距離多近時迴避角度達到minAvoidAngle
 	uint16_t midAvoidAngle = 80;    // 1/10 degree 中距迴避區段的最大傾角
 	uint16_t maxAvoidAngleThres = 400;   // dist mm 距離多近時迴避角度達到maxAvoidAngle
 	uint16_t maxAvoidAngle = 80;    // 1/10 degree 緊急迴避區段內的最大傾角
 
-	uint16_t endAvoidThres = 20;   // dist mm  小於此距離不迴避(雷射檢測失敗時距離會回傳20)
+	uint16_t endAvoidThres = 20;   // dist mm  小於等於此距離不迴避(雷射檢測失敗時距離會回傳20)
 
 	//close #20160831%phis103 需改為支援多感測器
 	for (int i = 0; i < TOFC_DEVICE_COUNT; i++)
@@ -158,7 +166,6 @@ void updateTofcStateForAvoidanceMode(void)
 				else
 				{
 					//TODO Error
-
 				}
 				//close #20160831%phis104 注意此處0與-1需根據tof安裝位置改變
 				//close #20160906%phis107 注意第5個tof用於高度感測,不處理姿態
@@ -171,48 +178,89 @@ void updateTofcStateForAvoidanceMode(void)
 	//debug[5] = TOFC_angle[AI_PITCH];
 }
 
+//ToF Camera Sensor Read Data(I2C DMA)
+void tofcI2cReadData(tofc_t *pTofc1)
+{
+	uint8_t in_addr = pTofc1->device.i2cAddr;
+	uint8_t VL53L0X_REG_buf[12];
+
+	for (int i = 0; i < 12; i++)
+		VL53L0X_REG_buf[i] = 0;
+	i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
+
+	uint16_t dist = makeuint16____(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
+	pTofc1->data.range = dist;
+	pTofc1->data.rangeStatus = VL53L0X_REG_buf[0];
+	pTofc1->data.deviceError = (VL53L0X_REG_buf[0] & 0x78) >> 3;
+	pTofc1->data.signalRate = (uint32_t)makeuint16____(VL53L0X_REG_buf[7], VL53L0X_REG_buf[6]);
+	pTofc1->data.ambientRate = makeuint16____(VL53L0X_REG_buf[9], VL53L0X_REG_buf[8]);
+	//effective Single-photon avalanche diode Return Count
+	pTofc1->data.effectiveSpadRtnCount = makeuint16____(VL53L0X_REG_buf[3], VL53L0X_REG_buf[2]);
+
+	//update rowData
+	pTofc1->rowData[pTofc1->nextRowDataIndex] = pTofc1->data;
+	pTofc1->nextRowDataIndex = (pTofc1->nextRowDataIndex + 1) % TOFC_ROWDATA_COUNT;
+}
+
+void tofcValidRangeUpdate(tofc_t *pTofc1)
+{
+	int32_t rowRange[TOFC_ROWDATA_COUNT];
+
+	//tofc Range Healthy Update
+	pTofc1->lastValidRangeHealthy = true;
+	for (int i = 0; i < TOFC_ROWDATA_COUNT; i++)
+	{
+		//check DeviceError Is Pass
+		if (pTofc1->rowData[i].deviceError != VL53L0X_DEVICEERROR_RANGECOMPLETE)
+		{
+			pTofc1->lastValidRangeHealthy = false;
+			break;
+		}
+
+		//quickMedianFilter5 init
+		rowRange[i] = pTofc1->rowData[i].range;
+	}
+
+	//過濾受測物體由靜止轉為移動時可能發生的極大或極小之錯誤測距結果
+	uint16_t filtedRange = (uint16_t)quickMedianFilter5(rowRange);
+
+
+	//tofc lastValidRange Update
+	uint32_t curMs = millis();
+	//if (pTofc1->data.deviceError == VL53L0X_DEVICEERROR_RANGECOMPLETE)
+	if (pTofc1->lastValidRangeHealthy)
+	{
+		//	pTofc1->lastValidRange = pTofc1->data.range;
+		pTofc1->lastValidRange = filtedRange;
+		pTofc1->lastValidRangeTime = curMs;
+	}
+	else if ((curMs - pTofc1->lastValidRangeTime) > pTofc1->config.validRangeKeepMs)
+	{
+		pTofc1->lastValidRange = VL53L0X_OUT_OF_RANGE;
+		pTofc1->lastValidRangeTime = curMs;
+	}
+}
+
 
 void tofcUpdate(void)
 {
 	//millis();
 	for (int i = 0; i < TOFC_DEVICE_COUNT; i++)
 	{
-		if (tofc[i].enable == false)
+		tofc_t *pCurTofc = &tofc[i];
+		if (pCurTofc->enable == false)
 		{
 			continue;
 		}
 
-		uint8_t in_addr = 0x29;//0x29 0x2C
-		in_addr = tofc[i].device.i2cAddr;
-		uint8_t VL53L0X_REG_buf[12];
-		uint32_t curMs = millis();
+		//tofc_t *pCurTofc;
 
-		for (int i = 0; i < 12; i++)
-			VL53L0X_REG_buf[i] = 0;
-		i2cRead(in_addr, VL53L0X_REG_RESULT_RANGE_STATUS, 12, VL53L0X_REG_buf);
+		tofcI2cReadData(pCurTofc);
+		tofcValidRangeUpdate(pCurTofc);
 
-		uint16_t dist = makeuint16____(VL53L0X_REG_buf[11], VL53L0X_REG_buf[10]);
-		tofc[i].data.range = dist;
-		tofc[i].data.rangeStatus = VL53L0X_REG_buf[0];
-		tofc[i].data.deviceError = (VL53L0X_REG_buf[0] & 0x78) >> 3;
-		tofc[i].data.signalRate = (uint32_t)makeuint16____(VL53L0X_REG_buf[7], VL53L0X_REG_buf[6]);
-		tofc[i].data.ambientRate = makeuint16____(VL53L0X_REG_buf[9], VL53L0X_REG_buf[8]);
-		tofc[i].data.effectiveSpadRtnCount = makeuint16____(VL53L0X_REG_buf[3], VL53L0X_REG_buf[2]);
-
-
-		if (tofc[i].data.deviceError == VL53L0X_DEVICEERROR_RANGECOMPLETE)
-		{
-			tofc[i].lastValidRange = dist;
-			tofc[i].lastValidRangeTime = curMs;
-		}
-		else if ((tofc[i].lastValidRangeTime - curMs) > tofc[i].config.validRangeKeepMs)
-		{
-			tofc[i].lastValidRange = VL53L0X_OUT_OF_RANGE;
-			tofc[i].lastValidRangeTime = curMs;
-		}
 
 #ifdef DEBUG_TOF
-		uint16_t debugOutDist = tofc[i].lastValidRange;
+		uint16_t debugOutDist = pCurTofc->lastValidRange;
 		if (debugOutDist <= VL53L0X_MIN_OF_RANGE)
 		{
 			debug[2 + i] = debugOutDist;
@@ -228,7 +276,6 @@ void tofcUpdate(void)
 		}
 		//debug[3 + i] = tofc[i].data.deviceError;
 #endif
-		//i2cWrite(in_addr, VL53L0X_REG_SYSRANGE_START, VL53L0X_REG_SYSRANGE_MODE_START_STOP);
 	}
 }
 
