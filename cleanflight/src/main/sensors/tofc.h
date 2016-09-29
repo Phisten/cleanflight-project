@@ -96,6 +96,7 @@ void updateTofcStateForAvoidanceMode(void);
 bool tofcIsValidRange(tofc_t tofc1);
 
 //alt hold
+void updateAvoidanceModeState(bool openclose);
 bool tofcIsAltitudeEnable(void);
 bool tofcGetAltitudeSensor(tofc_t* altTofc);
 int32_t tofcGetAltitudeMm(float cosTiltAngle);

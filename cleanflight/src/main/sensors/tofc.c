@@ -64,7 +64,9 @@ int16_t TOFC_angle[ANGLE_INDEX_COUNT] = { 0, 0 }; // ´ú¶Z«áÁ×»ÙÅÞ¿è¿é¥Xªº´Á±æ¶É¨
 
 //alt(z) avoidance
 int32_t tofcErrorVelocityI = 0;
-
+bool tofcAltHoldChange = 0;
+static int16_t initialRawThrottleHold=1400;
+static int16_t initialThrottleHold=1200;
 
 uint16_t makeuint16____(uint16_t lsb, uint16_t msb)
 {
@@ -290,7 +292,7 @@ int32_t calculateTofcAltHoldThrottleAdjustment(uint16_t AltHoldCm, uint16_t EstA
 
 	error = constrain(AltHoldCm - EstAltCm, -500, 500);
 	error = applyDeadband(error, 10); // remove small P parameter to reduce noise near zero position
-	setVel = constrain((pidProfile()->P8[PIDALT] * error / 128), -300, +300); // limit velocity to +/- 3 m/s
+	setVel = constrain((pidProfile()->P8[PIDALT] * error / 128), -50, +50); // limit velocity to +/- 3 m/s
 
 	// Velocity PID-Controller
 
@@ -299,9 +301,9 @@ int32_t calculateTofcAltHoldThrottleAdjustment(uint16_t AltHoldCm, uint16_t EstA
 	result = constrain((pidProfile()->P8[PIDVEL] * error / 32), -300, +300);
 
 	// I
-	tofcErrorVelocityI += (pidProfile()->I8[PIDVEL] * error);
-	tofcErrorVelocityI = constrain(tofcErrorVelocityI, -(8192 * 200), (8192 * 200));
-	result += tofcErrorVelocityI / 8192;     // I in range +/-200
+	//tofcErrorVelocityI += (pidProfile()->I8[PIDVEL] * error);
+	//tofcErrorVelocityI = constrain(tofcErrorVelocityI, -(8192 * 200), (8192 * 200));
+	//result += tofcErrorVelocityI / 8192;     // I in range +/-200
 
 	// D
 	result -= constrain(pidProfile()->D8[PIDVEL] * (accZ_tmp + accZ_old) / 512, -150, 150);
@@ -310,6 +312,17 @@ int32_t calculateTofcAltHoldThrottleAdjustment(uint16_t AltHoldCm, uint16_t EstA
 }
 
 // Avoidance Mode -----------------------------
+void updateAvoidanceModeState(bool openclose)
+{
+	if (tofc_debug_avoidanceMode != openclose)
+	{
+		initialRawThrottleHold = rcData[THROTTLE];
+		initialThrottleHold = rcCommand[THROTTLE];
+		tofcErrorVelocityI = 0;
+
+		tofc_debug_avoidanceMode = openclose;
+	}
+}
 
 //update TOFC_angle for AvoidanceMode
 void updateTofcStateForAvoidanceMode(void)
@@ -360,44 +373,47 @@ void updateTofcStateForAvoidanceMode(void)
 			{
 				if (i == TOFC_ALIGN_BOTTOM)
 				{
-					uint32_t currentTime = micros();
-					dTime = currentTime - previousTime;
-					previousTime = currentTime;
+					// rcRowCheck
 
-					//¥[³t«×­p¸ê°T­pºâ(©w°ª®É¦Ò¶qºD©Ê)
-					uint16_t tofcVel = 0;
-					if (accSumCount) {
-						accZ_tmp = (float)accSum[2] / (float)accSumCount;
-					}
-					else {
-						accZ_tmp = 0;
-					}
-					vel_acc = accZ_tmp * accVelScale * (float)accTimeSum;
+					// althold
+					//uint32_t currentTime = micros();
+					//dTime = currentTime - previousTime;
+					//previousTime = currentTime;
 
-					//¹p®g³t«×¸ê°T­pºâ(©w°ª®É¦Ò¶qºD©Ê)
-					tofcVel = (dist - lastDist)/10 * 1000000.0f / dTime; //Cm
-					lastDist = tofcVel;
+					////¥[³t«×­p¸ê°T­pºâ(©w°ª®É¦Ò¶qºD©Ê)
+					//uint16_t tofcVel = 0;
+					//if (accSumCount) {
+					//	accZ_tmp = (float)accSum[2] / (float)accSumCount;
+					//}
+					//else {
+					//	accZ_tmp = 0;
+					//}
+					//vel_acc = accZ_tmp * accVelScale * (float)accTimeSum;
 
-					tofcVel = constrain(tofcVel, -600, 600);  // constrain tofc velocity +/- 600cm/s
-					tofcVel = applyDeadband(tofcVel, 10);       // to reduce noise near zero
+					////¹p®g³t«×¸ê°T­pºâ(©w°ª®É¦Ò¶qºD©Ê)
+					//tofcVel = (dist - lastDist)/10 * 1000000.0f / dTime; //Cm
+					//lastDist = tofcVel;
 
-					float config_baro_cf_vel = 0.985;
-					vel = vel_acc * config_baro_cf_vel + tofcVel * (1.0f - config_baro_cf_vel);
-					vel_tmp = lrintf(vel);
+					//tofcVel = constrain(tofcVel, -600, 600);  // constrain tofc velocity +/- 600cm/s
+					//tofcVel = applyDeadband(tofcVel, 10);       // to reduce noise near zero
 
-					//¤Þ¤Jalthold©w°ªPID­pºâªoªù¶q
-					TOFC_AltHoldThrottleAdjustment = calculateTofcAltHoldThrottleAdjustment(startAltAvoidThresMm / 10, dist / 10, vel_tmp, accZ_tmp, accZ_old);
-					accZ_old = accZ_tmp;
+					//float config_baro_cf_vel = 0.985;
+					//vel = vel_acc * config_baro_cf_vel + tofcVel * (1.0f - config_baro_cf_vel);
+					//vel_tmp = lrintf(vel);
 
-					avoidP = TOFC_AltHoldThrottleAdjustment;
-					//uint16_t altError;
-					//altError = constrain(startAltAvoidThresMm - dist, -500, 500); //mm
-					//altError = applyDeadband(altError, 10) / 10; //Cm  remove small P parameter to reduce noise near zero position
-					//avoidP = constrain((pidProfile()->P8[PIDALT] * altError / 128), -30, +30); // limit velocity to +/- 30 cm/s
-					rcCommand[THROTTLE] = constrain(rcCommand[THROTTLE] + avoidP, motorAndServoConfig()->minthrottle, motorAndServoConfig()->maxthrottle);
+					////¤Þ¤Jalthold©w°ªPID­pºâªoªù¶q
+					//TOFC_AltHoldThrottleAdjustment = calculateTofcAltHoldThrottleAdjustment(startAltAvoidThresMm / 10, dist / 10, vel_tmp, accZ_tmp, accZ_old);
+					//accZ_old = accZ_tmp;
 
-					debug[0] = rcCommand[THROTTLE];
-					debug[1] = TOFC_AltHoldThrottleAdjustment;
+					//avoidP = TOFC_AltHoldThrottleAdjustment;
+					////uint16_t altError;
+					////altError = constrain(startAltAvoidThresMm - dist, -500, 500); //mm
+					////altError = applyDeadband(altError, 10) / 10; //Cm  remove small P parameter to reduce noise near zero position
+					////avoidP = constrain((pidProfile()->P8[PIDALT] * altError / 128), -30, +30); // limit velocity to +/- 30 cm/s
+					//rcCommand[THROTTLE] = constrain(rcCommand[THROTTLE] + avoidP, motorAndServoConfig()->minthrottle, motorAndServoConfig()->maxthrottle);
+
+					//debug[0] = rcCommand[THROTTLE];
+					//debug[1] = TOFC_AltHoldThrottleAdjustment;
 				}
 				else
 				{

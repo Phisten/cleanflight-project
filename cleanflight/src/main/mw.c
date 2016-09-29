@@ -559,12 +559,12 @@ void processRx(void)
             headFreeModeHold = DECIDEGREES_TO_DEGREES(attitude.values.yaw); // acquire new heading
 
 			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
-			tofc_debug_avoidanceMode = true;
+			updateAvoidanceModeState(true);
 		}
 		else
 		{
 			//TODO #20160901%phis105 暫時用重設無頭模式航向的功能來開關避障(rcModeIsActive(BOXHEADADJ) = avoidance Enable)
-			tofc_debug_avoidanceMode = false;
+			updateAvoidanceModeState(false);
 		}
     }
 #endif
