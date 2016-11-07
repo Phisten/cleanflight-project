@@ -1002,9 +1002,9 @@ static void cliSerial(char *cmdline)
                 portConfig.msp_baudrateIndex = baudRateIndex;
                 break;
             case 1:
-                if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
-                    continue;
-                }
+                //if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
+                //    continue;
+                //}
                 portConfig.gps_baudrateIndex = baudRateIndex;
                 break;
             case 2:

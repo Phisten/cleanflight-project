@@ -67,6 +67,7 @@ int32_t tofcErrorVelocityI = 0;
 bool tofcAltHoldChange = 0;
 static int16_t initialRawThrottleHold=1400;
 static int16_t initialThrottleHold=1200;
+uint16_t avoidanceResponseRange[TOFC_DEVICE_COUNT];
 
 uint16_t makeuint16____(uint16_t lsb, uint16_t msb)
 {
@@ -350,7 +351,7 @@ void updateTofcStateForAvoidanceMode(void)
 	//TODO #20160921%phis113 若演算法已決定,需將參數設定移至GUI
 	uint16_t startAvoidThres = 1200;   // dist mm 大於等於此距離不迴避(VL53L0X標準檢測距離1.2m 長距離2m)
 	uint16_t startAvoidAngle = 40;    // 1/10 degree 起始迴避區段的最大傾角
-	uint16_t midAvoidAngleThres = 900;   // dist mm 距離多近時迴避角度達到minAvoidAngle
+	uint16_t midAvoidAngleThres = 900;   // dist mm 距離多近時迴避角度達到startAvoidAngle
 	uint16_t midAvoidAngle = 80;    // 1/10 degree 中距迴避區段的最大傾角
 	uint16_t maxAvoidAngleThres = 400;   // dist mm 距離多近時迴避角度達到maxAvoidAngle
 	uint16_t maxAvoidAngle = 80;    // 1/10 degree 緊急迴避區段內的最大傾角
@@ -361,6 +362,7 @@ void updateTofcStateForAvoidanceMode(void)
 	//uint16_t midAltAvoidThresMm = 750;
 	//uint16_t closeAltAvoidThresMm = 100;
 	//uint16_t endAltAvoidThresMm = 100;
+
 
 	//close #20160831%phis103 需改為支援多感測器
 	for (int i = 0; i < TOFC_DEVICE_COUNT; i++)

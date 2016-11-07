@@ -122,8 +122,22 @@ static const gpsInitData_t gpsInitData[] = {
     { GPS_BAUDRATE_38400,    BAUD_38400, "$PUBX,41,1,0003,0001,38400,0*26\r\n", "$PMTK251,38400*27\r\n" },
     { GPS_BAUDRATE_19200,    BAUD_19200, "$PUBX,41,1,0003,0001,19200,0*23\r\n", "$PMTK251,19200*22\r\n" },
     // 9600 is not enough for 5Hz updates - leave for compatibility to dumb NMEA that only runs at this speed
-    { GPS_BAUDRATE_9600,      BAUD_9600, "$PUBX,41,1,0003,0001,9600,0*16\r\n", "" }
+    { GPS_BAUDRATE_9600,      BAUD_9600, "$PUBX,41,1,0003,0001,9600,0*16\r\n", "" },
+	{ GPS_BAUDRATE_4800,      BAUD_4800, "$PUBX,41,1,0003,0001,4800,0*16\r\n", "" }
 };
+
+//typedef struct gpsData_s {
+//	uint8_t state;                  // GPS thread state. Used for detecting cable disconnects and configuring attached devices
+//	uint8_t baudrateIndex;          // index into auto-detecting or current baudrate
+//	uint32_t errors;                // gps error counter - crc error/lost of data/sync etc..
+//	uint32_t timeouts;
+//	uint32_t lastMessage;           // last time valid GPS data was received (millis)
+//	uint32_t lastLastMessage;       // last-last valid GPS message. Used to calculate delta.
+//
+//	uint32_t state_position;        // incremental variable for loops
+//	uint32_t state_ts;              // timestamp for last state_position increment
+//	gpsMessageState_e messageState;
+//} gpsData_t;
 
 #define GPS_INIT_DATA_ENTRY_COUNT (sizeof(gpsInitData) / sizeof(gpsInitData[0]))
 
